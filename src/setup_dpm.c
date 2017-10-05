@@ -46,7 +46,7 @@ static BOOT_MODE_LED_T get_boot_mode(void)
 
 
 
-void start(void);
+void __attribute__ ((section (".init_code"))) start(void);
 void start(void)
 {
 	int iResult;
