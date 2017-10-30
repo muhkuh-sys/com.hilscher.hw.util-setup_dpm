@@ -424,6 +424,7 @@ BOOTING_T boot_dpm(DPM_TRANSPORT_TYPE_T tDpmTransportType)
 	{
 		/* Initialize the DPM. */
 		dpm_init(tDpmTransportType);
+		tResult = BOOTING_Ok;
 	}
 
 	return tResult;
