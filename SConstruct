@@ -42,6 +42,8 @@ SConscript('platform/SConscript')
 sources = """
 	src/boot_dpm.c
 	src/cr7_global_timer.c
+	src/memory.c
+	src/portcontrol.c
 	src/setup_dpm.c
 """
 
@@ -51,7 +53,7 @@ astrIncludePaths = ['src', '#platform/src', '#platform/src/lib']
 tEnv = atEnv.NETX4000_RELAXED.Clone()
 tEnv.Append(CPPPATH = astrIncludePaths)
 tEnv.Append(CPPDEFINES = [['ASIC_ENV_ASIC', '0'], ['ASIC_ENV_SCIT_BOARD', '1'], ['ASIC_ENV_SIMU', '2'], ['ASIC_ENV', '0'], ['CFG_ARTIFICIAL_KEYROM', '0'], ['CFG_ARTIFICIAL_OTP_FUSES', '0']])
-tEnv.Replace(LDFILE = 'src/netx4000/netx4000_cr7.ld')
+tEnv.Replace(LDFILE = 'src/netx4000/netx4000_relaxed_cr7.ld')
 tSrc = tEnv.SetBuildPath('targets/netx4000', 'src', sources)
 tElf = tEnv.Elf('targets/netx4000/setup_dpm_netx4000_intram.elf', tSrc + tEnv['PLATFORM_LIBRARY'])
 tTxt = tEnv.ObjDump('targets/netx4000/setup_dpm_netx4000_intram.txt', tElf, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])

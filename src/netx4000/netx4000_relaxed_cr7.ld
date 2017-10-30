@@ -19,6 +19,7 @@ SECTIONS
 		*(.v4_bx)
 	} >ASSERT_EMPTY
 
+	PROVIDE( g_t_romloader_options = 0x00023898 );
 
 	.code ORIGIN(CODE) :
 	{
