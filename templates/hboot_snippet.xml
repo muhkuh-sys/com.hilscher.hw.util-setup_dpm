@@ -1,4 +1,4 @@
-<!-- Load the show_hwconfig program. -->
+<!-- Load the setup_dpm program. -->
 <Data>
 	<Hex address="${%LOAD_ADDRESS%}">
 ${%PROGRAM_DATA%}
