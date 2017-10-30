@@ -129,7 +129,7 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType)
 	/* DPM mapping:
 	 * 0x0000 - 0xffff : intramhs_dpm_mirror
 	 */
-	ptDpmArea->ulDpm_win1_end = 0xffffU + 1;
+	ptDpmArea->ulDpm_win1_end = 0; /* 0xffffU + 1; */
 	ulNetxAdr = HOSTADDR(intramhs_dpm_mirror);
 	ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(dpm_win1_map_win_map);
 	ulValue |= ulNetxAdr & HOSTMSK(dpm_win1_map_win_page);
@@ -154,7 +154,8 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType)
 
 	/* configure DPM */
 	ptDpmArea->ulDpm_cfg0x0       = g_t_romloader_options.t_hif_options.ucDpmCfg0x0;
-	ptDpmArea->ulDpm_addr_cfg     = g_t_romloader_options.t_hif_options.ucDpmAddrCfg;
+	/* Disable the configuration window. */
+	ptDpmArea->ulDpm_addr_cfg     = g_t_romloader_options.t_hif_options.ucDpmAddrCfg | HOSTMSK(dpm_addr_cfg_cfg_win_addr_cfg);
 	ptDpmArea->ulDpm_timing_cfg   = g_t_romloader_options.t_hif_options.ucDpmTimingCfg;
 	ptDpmArea->ulDpm_rdy_cfg      = g_t_romloader_options.t_hif_options.ucDpmRdyCfg;
 	ptDpmArea->ulDpm_misc_cfg     = g_t_romloader_options.t_hif_options.ucDpmMiscCfg;
