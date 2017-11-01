@@ -37,7 +37,7 @@ SConscript('platform/SConscript')
 
 #----------------------------------------------------------------------------
 #
-# Build the netx4000 snippet.
+# Build the netx4000 RELAXED snippet.
 #
 sources_netx4000_relaxed = """
 	src/netx4000_relaxed/boot_dpm.c
@@ -79,3 +79,9 @@ snippet_netx4000_relaxed = tEnv_netx4000_relaxed.HBootSnippet('%s/%s-%s.xml' % (
 
 # Create the POM file.
 tPOM_netx4000_relaxed = tEnv_netx4000_relaxed.POMTemplate('%s/%s-%s.pom' % (strArtifactPath_netx4000_relaxed, atSnippet_netx4000_relaxed['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet_netx4000_relaxed['group'], POM_TEMPLATE_ARTIFACT=atSnippet_netx4000_relaxed['artifact'], POM_TEMPLATE_VERSION=atSnippet_netx4000_relaxed['version'], POM_TEMPLATE_PACKAGING='xml')
+
+
+#----------------------------------------------------------------------------
+#
+# Build the netx90 MPW snippet.
+#
