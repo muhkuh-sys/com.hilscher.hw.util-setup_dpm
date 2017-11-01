@@ -62,18 +62,18 @@ tTmp = tEnv.GccSymbolTemplate('targets/netx4000/snippet.xml', tElf, GCCSYMBOLTEM
 
 # Create the snippet from the parameters.
 global PROJECT_VERSION
-aArtifactGroupReverse = ['org', 'muhkuh', 'hboot', 'sniplib']
+aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
 atSnippet = {
     'group': '.'.join(aArtifactGroupReverse),
-    'artifact': 'setup_ddr_netx4000',
+    'artifact': 'setup_dpm_netx4000',
     'version': PROJECT_VERSION,
     'vcs_id': tEnv.Version_GetVcsIdLong(),
     'vcs_url': tEnv.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
-    'author_name': 'Muhkuh team',
+    'author_name': 'Hilscher Gesellschaft für Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
     'description': 'Setup the DPM on a netX4000. The strapping options determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
-    'categories': ['netx4000', 'booting', 'DDR'],
+    'categories': ['netx4000', 'booting', 'DPM'],
     'parameter': {
     }
 }
