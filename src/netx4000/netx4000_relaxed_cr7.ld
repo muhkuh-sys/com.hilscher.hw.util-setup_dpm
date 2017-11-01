@@ -21,6 +21,9 @@ SECTIONS
 
 	PROVIDE( g_t_romloader_options = 0x00023898 );
 
+	/* The romvector section contains the vector table at the start of the ROM. */
+	PROVIDE ( tRomVector = 0x04100000 );
+
 	.code ORIGIN(CODE) :
 	{
 		KEEP(*(.init_code))
