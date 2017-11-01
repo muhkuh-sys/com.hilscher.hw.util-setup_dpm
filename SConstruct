@@ -40,42 +40,42 @@ SConscript('platform/SConscript')
 # Build the netx4000 snippet.
 #
 sources_netx4000_relaxed = """
-	src/netx4000/boot_dpm.c
-	src/netx4000/cr7_global_timer.c
-	src/netx4000/memory.c
-	src/netx4000/portcontrol.c
-	src/netx4000/setup_dpm.c
+	src/netx4000_relaxed/boot_dpm.c
+	src/netx4000_relaxed/cr7_global_timer.c
+	src/netx4000_relaxed/memory.c
+	src/netx4000_relaxed/portcontrol.c
+	src/netx4000_relaxed/setup_dpm.c
 """
 
-tEnv = atEnv.NETX4000_RELAXED.Clone()
-tEnv.Append(CPPPATH = ['src', 'src/netx4000', '#platform/src', '#platform/src/lib'])
-tEnv.Append(CPPDEFINES = [['ASIC_ENV_ASIC', '0'], ['ASIC_ENV_SCIT_BOARD', '1'], ['ASIC_ENV_SIMU', '2'], ['ASIC_ENV', '0'], ['CFG_ARTIFICIAL_KEYROM', '0'], ['CFG_ARTIFICIAL_OTP_FUSES', '0']])
-tEnv.Replace(LDFILE = 'src/netx4000/netx4000_relaxed_cr7.ld')
-tSrc = tEnv.SetBuildPath('targets/netx4000', 'src', sources_netx4000_relaxed)
-tElf = tEnv.Elf('targets/netx4000/setup_dpm_netx4000_intram.elf', tSrc + tEnv['PLATFORM_LIBRARY'])
-tTxt = tEnv.ObjDump('targets/netx4000/setup_dpm_netx4000_intram.txt', tElf, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
-tBin = tEnv.ObjCopy('targets/netx4000/setup_dpm_netx4000_intram.bin', tElf)
-tTmp = tEnv.GccSymbolTemplate('targets/netx4000/snippet.xml', tElf, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin[0])
+tEnv_netx4000_relaxed = atEnv.NETX4000_RELAXED.Clone()
+tEnv_netx4000_relaxed.Append(CPPPATH = ['src', 'src/netx4000_relaxed', '#platform/src', '#platform/src/lib'])
+tEnv_netx4000_relaxed.Append(CPPDEFINES = [['ASIC_ENV_ASIC', '0'], ['ASIC_ENV_SCIT_BOARD', '1'], ['ASIC_ENV_SIMU', '2'], ['ASIC_ENV', '0'], ['CFG_ARTIFICIAL_KEYROM', '0'], ['CFG_ARTIFICIAL_OTP_FUSES', '0']])
+tEnv_netx4000_relaxed.Replace(LDFILE = 'src/netx4000_relaxed/netx4000_relaxed_cr7.ld')
+tSrc_netx4000_relaxed = tEnv_netx4000_relaxed.SetBuildPath('targets/netx4000_relaxed', 'src', sources_netx4000_relaxed)
+tElf_netx4000_relaxed = tEnv_netx4000_relaxed.Elf('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.elf', tSrc_netx4000_relaxed + tEnv_netx4000_relaxed['PLATFORM_LIBRARY'])
+tTxt_netx4000_relaxed = tEnv_netx4000_relaxed.ObjDump('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.txt', tElf_netx4000_relaxed, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
+tBin_netx4000_relaxed = tEnv_netx4000_relaxed.ObjCopy('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.bin', tElf_netx4000_relaxed)
+tTmp_netx4000_relaxed = tEnv_netx4000_relaxed.GccSymbolTemplate('targets/netx4000_relaxed/snippet.xml', tElf_netx4000_relaxed, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_relaxed[0])
 
 # Create the snippet from the parameters.
 global PROJECT_VERSION
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
-atSnippet = {
+atSnippet_netx4000_relaxed = {
     'group': '.'.join(aArtifactGroupReverse),
-    'artifact': 'setup_dpm_netx4000',
+    'artifact': 'setup_dpm_netx4000_relaxed',
     'version': PROJECT_VERSION,
-    'vcs_id': tEnv.Version_GetVcsIdLong(),
-    'vcs_url': tEnv.Version_GetVcsUrl(),
+    'vcs_id': tEnv_netx4000_relaxed.Version_GetVcsIdLong(),
+    'vcs_url': tEnv_netx4000_relaxed.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
     'author_name': 'Hilscher Gesellschaft für Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
-    'description': 'Setup the DPM on a netX4000. The strapping options determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
+    'description': 'Setup the DPM on a netX4000 RELAXED. The strapping options determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
     'categories': ['netx4000', 'booting', 'DPM'],
     'parameter': {
     }
 }
-strArtifactPath = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet['artifact'], PROJECT_VERSION)
-snippet_netx90_mpw_com = tEnv.HBootSnippet('%s/%s-%s.xml' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), tTmp, PARAMETER=atSnippet)
+strArtifactPath_netx4000_relaxed = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet_netx4000_relaxed['artifact'], PROJECT_VERSION)
+snippet_netx4000_relaxed = tEnv_netx4000_relaxed.HBootSnippet('%s/%s-%s.xml' % (strArtifactPath_netx4000_relaxed, atSnippet_netx4000_relaxed['artifact'], PROJECT_VERSION), tTmp_netx4000_relaxed, PARAMETER=atSnippet_netx4000_relaxed)
 
 # Create the POM file.
-tPOM = tEnv.POMTemplate('%s/%s-%s.pom' % (strArtifactPath, atSnippet['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet['group'], POM_TEMPLATE_ARTIFACT=atSnippet['artifact'], POM_TEMPLATE_VERSION=atSnippet['version'], POM_TEMPLATE_PACKAGING='xml')
+tPOM_netx4000_relaxed = tEnv_netx4000_relaxed.POMTemplate('%s/%s-%s.pom' % (strArtifactPath_netx4000_relaxed, atSnippet_netx4000_relaxed['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet_netx4000_relaxed['group'], POM_TEMPLATE_ARTIFACT=atSnippet_netx4000_relaxed['artifact'], POM_TEMPLATE_VERSION=atSnippet_netx4000_relaxed['version'], POM_TEMPLATE_PACKAGING='xml')
