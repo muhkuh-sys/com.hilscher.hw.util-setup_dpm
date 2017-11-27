@@ -277,7 +277,12 @@ static BOOTING_T pcie_init(void)
 		/* The PCIe core was not enabled yet. */
 
 		/* RAP_SYSCTRL_PcieSetup(0, true); */
-		ulValue  = (unsigned long)(g_t_romloader_options.tPcieOptions.usSysctrlPcieCfg);
+		ulValue  = HOSTMSK(RAP_SYSCTRL_PCIECFG_MODE_CISRMSEL);       /* input DC-coupling like demanded in base spec */
+		ulValue |= HOSTMSK(RAP_SYSCTRL_PCIECFG_MODE_RISRCREN);       /* receiver termination 50 Ohms to GND */
+		ulValue |= HOSTMSK(RAP_SYSCTRL_PCIECFG_MODE_TX_DRV_EN);      /* enable output driver */
+		ulValue |= HOSTMSK(RAP_SYSCTRL_PCIECFG_MODE_CISRREN);        /* use internal reference clock input termination */
+		ulValue |= HOSTMSK(RAP_SYSCTRL_PCIECFG_D3_EVENT_ACK);        /* enable power state D3hot for PCIe endpoint */
+		ulValue |= HOSTMSK(RAP_SYSCTRL_PCIECFG_TURN_OFF_EVENT_ACK);  /* ... like D3_EVENT_ACK */
 		ptRAPSysctrlArea->ulRAP_SYSCTRL_PCIECFG = ulValue;
 
 		/* Setup the ACP cache policy. */
