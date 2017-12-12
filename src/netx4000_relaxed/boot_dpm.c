@@ -439,6 +439,7 @@ BOOTING_T boot_dpm(DPM_TRANSPORT_TYPE_T tDpmTransportType)
 
 BOOTING_T boot_pcie(void)
 {
+	HOSTDEF(ptIdpm0Area);
 	BOOTING_T tResult;
 	void *pvDPM;
 
@@ -454,6 +455,10 @@ BOOTING_T boot_pcie(void)
 
 	/* Setup the PCIE core. */
 	tResult = pcie_init();
+	if( tResult==BOOTING_Ok )
+	{
+		ptIdpm0Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
+	}
 
 	return tResult;
 }
