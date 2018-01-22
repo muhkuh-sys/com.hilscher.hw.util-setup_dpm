@@ -434,14 +434,14 @@ static int init_default_sdpm(unsigned int uiUnit)
 
 typedef enum CONSOLEMODE_ENUM
 {
-	CONSOLEMODE_Eth_Intphy  = 0,
-	CONSOLEMODE_Eth_Extphy  = 1,
-	CONSOLEMODE_Eth_LVDS    = 2,
-	CONSOLEMODE_DPM_8bit    = 3,
-	CONSOLEMODE_DPM_16bit   = 4,
-	CONSOLEMODE_SPM1        = 5,
-	CONSOLEMODE_SPM0        = 6,
-	CONSOLEMODE_UART        = 7
+	CONSOLEMODE_Eth_Intphy  = 7,
+	CONSOLEMODE_Eth_Extphy  = 6,
+	CONSOLEMODE_Eth_LVDS    = 5,
+	CONSOLEMODE_DPM_8bit    = 4,
+	CONSOLEMODE_DPM_16bit   = 3,
+	CONSOLEMODE_SPM1        = 2,
+	CONSOLEMODE_SPM0        = 1,
+	CONSOLEMODE_UART        = 0
 } CONSOLEMODE_T;
 
 static CONSOLEMODE_T get_console_mode(void)
