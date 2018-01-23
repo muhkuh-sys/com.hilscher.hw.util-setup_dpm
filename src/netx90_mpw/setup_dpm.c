@@ -52,7 +52,7 @@ typedef struct
 
 static const IDPM_CONFIGURATION_T tDefaultIdpmConfig= {
 	.ulIdpmCfg0x0 = 0x01,
-	.ulIdpmAddrCfg = 030
+	.ulIdpmAddrCfg = 0x30
 };
 
 static const DEFAULT_HIF_CONFIG_T t_hif_options_default =
