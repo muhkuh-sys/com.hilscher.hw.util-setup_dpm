@@ -119,6 +119,7 @@ atSnippet_netx90_mpw = {
     'description': 'Setup the DPM on a netX90 MPW. The strapping options determine if the parallel or serial DPM should be configured.',
     'categories': ['netx90', 'booting', 'DPM'],
     'parameter': {
+        'CONFIGURATION_ADDRESS': {'help': 'The address of the hardware config.', 'default': 0}
     }
 }
 strArtifactPath_netx90_mpw = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet_netx90_mpw['artifact'], PROJECT_VERSION)
