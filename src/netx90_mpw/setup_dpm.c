@@ -1,3 +1,8 @@
+/* 
+Todo:
+Currently, a DPM configured via default config gets a different cookie than a DPM configured via config structure.
+Should we replace it with a single one?
+*/
 
 #include <string.h>
 
@@ -39,14 +44,16 @@ typedef struct
 	IDPM_CONFIGURATION_T tIdpmConfig;
 } HIF_CONFIG_T;
 
-
-
-
 typedef struct
 {
 	unsigned long ulHifIoCfg;
 	DPM_CONFIGURATION_T tDpmConfig;
 } DEFAULT_HIF_CONFIG_T;
+
+static const IDPM_CONFIGURATION_T tDefaultIdpmConfig= {
+	.ulIdpmCfg0x0 = 0x01,
+	.ulIdpmAddrCfg = 030
+};
 
 static const DEFAULT_HIF_CONFIG_T t_hif_options_default =
 {
@@ -65,7 +72,6 @@ static const DEFAULT_HIF_CONFIG_T t_hif_options_default =
 };
 
 DEFAULT_HIF_CONFIG_T t_hif_options;
-
 
 
 
@@ -203,7 +209,7 @@ static void dpm_configure(HOSTADEF(DPM) *ptDpmArea, DPM_CONFIGURATION_T* ptDpmCo
 	ptDpmArea->aulDpm_pio_cfg[1]  = ptDpmConfig->ulDpmPioCfg1;
 }
 
-static void idpm_configure(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig)
+static void idpm_configure(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_T* ptIdpmConfig)
 {
 	unsigned long ulNetxAdr;
 	unsigned long ulValue;
@@ -267,6 +273,7 @@ static void init_handshake_area(void)
 }
 
 
+
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -316,7 +323,6 @@ static int dpm_deinit_registers(unsigned int uiUnit)
 
 
 
-
 static int init_dpm(unsigned int uiUnit)
 {
 	HOSTDEF(ptDpm0ComArea);
@@ -357,7 +363,6 @@ static int init_dpm(unsigned int uiUnit)
 
 	return iResult;
 }
-
 
 /***************************************************************
                  Default DPM config
@@ -529,24 +534,22 @@ static int setup_console_mode_dpm(void)
 
 
 
-
 /*-------------------------------------------------------------------------*/
 
 
 
 /*
-1. Prüfen, ob DPM Clock eingeschaltet werden kann.
-   nein: Abbruch
-   ja: Clock einschalten
+1. Check if the DPM clock can be enabled.
+   If yes: enable it.
+   If no: error
    
-2. Intram-HS-Bereich initialisieren
-   allg. Kennung setzen?
-   
-3. HIF IO CFG auf Defaultwert setzen (?)
-   
-4. Für DPM0, DPM1, IDPM: Wenn Konfiguration vorhanden, deinitialisieren und konfigurieren
+2. Clear the intram HS area and put the DPM cookie at the beginning.
 
-5. HIF IO CFG setzen 
+3. Set HIF IO CFG to a default value.
+
+4. Initialize DPM0, DPM1 and IDPM, if a configuration is present.
+
+5. Set HIF IO CFG to the configured value.
 */
 
 #define MESSAGE_DPM "netX90 MPW DPM"
@@ -587,9 +590,28 @@ int setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		clear_dpm_irqs(ptDpm1ComArea);
 		clear_idpm_irqs(ptIdpmComArea);
 		
+		/* Configure all DPM blocks which are enabled in the configuration structure. */
+		if (ptDpmConfigAll->ulDPM0Enable != 0)
+		{
+			dpm_configure(ptDpm1ComArea, &(ptDpmConfigAll->tDpm1Config));
+		}
 		dpm_configure(ptDpm0ComArea, &(ptDpmConfigAll->tDpm0Config));
-		dpm_configure(ptDpm1ComArea, &(ptDpmConfigAll->tDpm1Config));
-		idpm_configure(ptIdpmComArea, &(ptDpmConfigAll->tIdpmConfig));
+		if (ptDpmConfigAll->ulDPM1Enable != 0)
+		{
+			dpm_configure(ptDpm1ComArea, &(ptDpmConfigAll->tDpm1Config));
+		}
+		if (ptDpmConfigAll->ulIDPMEnable != 0)
+		{
+			idpm_configure(ptIdpmComArea, &(ptDpmConfigAll->tIdpmConfig));
+		}
+		
+		/* If no DPM is configured, enable the internal DPM. */
+		if ((ptDpmConfigAll->ulDPM0Enable == 0) &&
+			(ptDpmConfigAll->ulDPM1Enable == 0) &&
+			(ptDpmConfigAll->ulIDPMEnable == 0))
+			{
+				idpm_configure(ptIdpmComArea, &tDefaultIdpmConfig);
+			}
 		
 		/* Configure the HIF pins */
 		set_hif_io_config(ptDpmConfigAll->ulHifIoCfg);
@@ -607,7 +629,7 @@ void __attribute__ ((section (".init_code"))) start(HIF_CONFIG_T* ptDpmConfig);
 void start(HIF_CONFIG_T* ptDpmConfig)
 {
 	int iResult;
-	
+
 	if (ptDpmConfig == NULL)
 	{
 		iResult = setup_console_mode_dpm();
