@@ -1,7 +1,34 @@
-/* 
-Todo:
-Currently, a DPM configured via default config gets a different cookie than a DPM configured via config structure.
-Should we replace it with a single one?
+/*
+Configure one or more DPMs depending on a configuration structure or 
+the strapping pins.
+
+On entry, R0 contains either NULL or a pointer to a DPM configuration structure.
+
+If R0 is NULL:
+    Read the strapping pins and configure a DPM depending on the pins, using default values.
+    
+1. Enable the DPM clock.
+   If it cannot be enabled, exit with an error.
+2. Clear the intram HS area and put the DPM cookie at the beginning.
+3. Set HIF IO CFG to the reset value.
+   De-initialize the selected DPM.
+   (clear the DPM mapping, init the handshake area, clear pending IRQs.)
+4. Configure the selected DPM.
+5. Set HIF_IO_Config to the value in the default config.
+        
+If R0 is not NULL:
+    R0 points to a DPM configuration structure.
+    
+1. Enable the DPM clock.
+   If it cannot be enabled, exit with an error.
+2. Clear the intram HS area and put the DPM cookie at the beginning.
+3. Set HIF IO CFG to the reset value.
+   Disable DPM0, DPM1 and IDPM (clear the DPM mapping, init the 
+   handshake area, clear pending IRQs.)
+4. Initialize DPM0, DPM1 and IDPM, if a configuration is present.
+   If no DPM is enabled in the configuration structure, configure
+   an IDPM with default values.
+5. Set HIF IO CFG to the value in the configuration.
 */
 
 #include <string.h>
@@ -13,6 +40,8 @@ Should we replace it with a single one?
 
 #define __IRQ_LOCK__   {__asm__ volatile ("cpsid   i");}
 #define __IRQ_UNLOCK__ {__asm__ volatile ("cpsie   i");}
+
+#define MESSAGE_DPM "netX90 MPW DPM"
 
 typedef struct STRUCT_DPM_CONFIGURATION
 {
@@ -242,6 +271,15 @@ static void idpm_configure(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_
 }
 
 
+/* Clear the Handshake intram and put a message/cookie at the beginning. */
+static void init_intramhs(void)
+{
+	void *pvDPM;
+	pvDPM = (void*)HOSTADDR(intramhs_straight_mirror);
+	memset(pvDPM, 0, 32768);
+	memcpy(pvDPM, MESSAGE_DPM, sizeof(MESSAGE_DPM));    
+}
+
 static void init_handshake_area(void)
 {
 	HOSTDEF(ptHandshakeComArea);
@@ -368,21 +406,13 @@ static int init_dpm(unsigned int uiUnit)
                  Default DPM config
 ***************************************************************/
 
-#define MESSAGE_DPM_PARALLEL "netX90 MPW parallel DPM"
-#define MESSAGE_DPM_SERIAL "netX90 MPW serial DPM"
-
 static int init_default_pdpm(unsigned int uiBits)
 {
-	void *pvDPM;
 	unsigned int uiDPMUnit;
 	unsigned long ulValue;
 	int iResult;
 
-
-	/* Leave a message in the DPM. */
-	pvDPM = (void*)HOSTADDR(intramhs_straight_mirror);
-	memset(pvDPM, 0, 32768);
-	memcpy(pvDPM, MESSAGE_DPM_PARALLEL, sizeof(MESSAGE_DPM_PARALLEL));
+	init_intramhs();
 
 	/* Activate parallel DPM in the HIF IO configuration. */
 	memcpy(&t_hif_options, &t_hif_options_default, sizeof(DPM_CONFIGURATION_T));
@@ -407,18 +437,12 @@ static int init_default_pdpm(unsigned int uiBits)
 }
 
 
-
 static int init_default_sdpm(unsigned int uiUnit)
 {
-	void *pvDPM;
 	unsigned long ulValue;
 	int iResult;
 
-
-	/* Leave a message in the DPM. */
-	pvDPM = (void*)HOSTADDR(intramhs_straight_mirror);
-	memset(pvDPM, 0, 32768);
-	memcpy(pvDPM, MESSAGE_DPM_SERIAL, sizeof(MESSAGE_DPM_SERIAL));
+	init_intramhs();
 
 	/* Activate serial DPM in the HIF IO configuration. */
 	memcpy(&t_hif_options, &t_hif_options_default, sizeof(DPM_CONFIGURATION_T));
@@ -480,8 +504,8 @@ typedef struct
 extern const ROM_ID_T tRomId;
 #define ROMID_netX90_MPW 0x0010a005
 
-
-static int setup_console_mode_dpm(void)
+int setup_console_mode_dpm(void);
+int setup_console_mode_dpm(void)
 {
 	int iResult;
 	CONSOLEMODE_T tConsoleMode;
@@ -538,38 +562,17 @@ static int setup_console_mode_dpm(void)
 
 
 
-/*
-1. Check if the DPM clock can be enabled.
-   If yes: enable it.
-   If no: error
-   
-2. Clear the intram HS area and put the DPM cookie at the beginning.
-
-3. Set HIF IO CFG to a default value.
-
-4. Initialize DPM0, DPM1 and IDPM, if a configuration is present.
-
-5. Set HIF IO CFG to the configured value.
-*/
-
-#define MESSAGE_DPM "netX90 MPW DPM"
-
-int setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll);
-int setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
+ int setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 {
 	HOSTDEF(ptDpm0ComArea);
 	HOSTDEF(ptDpm1ComArea);
 	HOSTDEF(ptIdpmComArea);
-	void *pvDPM;
 	int iResult;
 	
 	/* Be pessimistic. */
 	iResult = -1;
 	
-	/* Leave a message in the DPM. */
-	pvDPM = (void*)HOSTADDR(intramhs_straight_mirror);
-	memset(pvDPM, 0, 32768);
-	memcpy(pvDPM, MESSAGE_DPM, sizeof(MESSAGE_DPM));
+	init_intramhs();
 	
 	iResult = enable_dpm_clock();
 	if (iResult==0)
