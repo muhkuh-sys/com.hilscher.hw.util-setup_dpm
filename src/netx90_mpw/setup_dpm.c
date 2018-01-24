@@ -561,7 +561,7 @@ int setup_console_mode_dpm(void)
 /*-------------------------------------------------------------------------*/
 
 
-
+ int setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll);
  int setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 {
 	HOSTDEF(ptDpm0ComArea);
