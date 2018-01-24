@@ -44,6 +44,13 @@ global PROJECT_VERSION
 
 #----------------------------------------------------------------------------
 #
+# Get the source code version from the VCS.
+#
+atEnv.DEFAULT.Version('#targets/version/version.h', 'templates/version.h')
+atEnv.DEFAULT.Version('#targets/hboot_snippet.xml', 'templates/hboot_snippet.xml')
+
+#----------------------------------------------------------------------------
+#
 # Build the netx4000 RELAXED snippet.
 #
 sources_netx4000_relaxed = """
@@ -55,14 +62,14 @@ sources_netx4000_relaxed = """
 """
 
 tEnv_netx4000_relaxed = atEnv.NETX4000_RELAXED.Clone()
-tEnv_netx4000_relaxed.Append(CPPPATH = ['src', 'src/netx4000_relaxed', '#platform/src', '#platform/src/lib'])
+tEnv_netx4000_relaxed.Append(CPPPATH = ['src', 'src/netx4000_relaxed', '#platform/src', '#platform/src/lib', '#targets/version'])
 tEnv_netx4000_relaxed.Append(CPPDEFINES = [['ASIC_ENV_ASIC', '0'], ['ASIC_ENV_SCIT_BOARD', '1'], ['ASIC_ENV_SIMU', '2'], ['ASIC_ENV', '0'], ['CFG_ARTIFICIAL_KEYROM', '0'], ['CFG_ARTIFICIAL_OTP_FUSES', '0']])
 tEnv_netx4000_relaxed.Replace(LDFILE = 'src/netx4000_relaxed/netx4000_relaxed_cr7.ld')
 tSrc_netx4000_relaxed = tEnv_netx4000_relaxed.SetBuildPath('targets/netx4000_relaxed', 'src', sources_netx4000_relaxed)
 tElf_netx4000_relaxed = tEnv_netx4000_relaxed.Elf('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.elf', tSrc_netx4000_relaxed + tEnv_netx4000_relaxed['PLATFORM_LIBRARY'])
 tTxt_netx4000_relaxed = tEnv_netx4000_relaxed.ObjDump('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.txt', tElf_netx4000_relaxed, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
 tBin_netx4000_relaxed = tEnv_netx4000_relaxed.ObjCopy('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.bin', tElf_netx4000_relaxed)
-tTmp_netx4000_relaxed = tEnv_netx4000_relaxed.GccSymbolTemplate('targets/netx4000_relaxed/snippet.xml', tElf_netx4000_relaxed, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_relaxed[0])
+tTmp_netx4000_relaxed = tEnv_netx4000_relaxed.GccSymbolTemplate('targets/netx4000_relaxed/snippet.xml', tElf_netx4000_relaxed, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_relaxed[0])
 
 # Create the snippet from the parameters.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
@@ -93,17 +100,18 @@ tPOM_netx4000_relaxed = tEnv_netx4000_relaxed.POMTemplate('%s/%s-%s.pom' % (strA
 #
 sources_netx90_mpw = """
 	src/netx90_mpw/setup_dpm.c
+	src/header.c
 """
 
 tEnv_netx90_mpw = atEnv.NETX90_MPW.Clone()
-tEnv_netx90_mpw.Append(CPPPATH = ['src', 'src/netx90_mpw', '#platform/src', '#platform/src/lib'])
+tEnv_netx90_mpw.Append(CPPPATH = ['src', 'src/netx90_mpw', '#platform/src', '#platform/src/lib', '#targets/version'])
 tEnv_netx90_mpw.Append(CPPDEFINES = [['ASIC_ENV_ASIC', '0'], ['ASIC_ENV_SCIT_BOARD', '1'], ['ASIC_ENV_SIMU', '2'], ['ASIC_ENV', '0'], ['CFG_ARTIFICIAL_KEYROM', '0'], ['CFG_ARTIFICIAL_OTP_FUSES', '0']])
 tEnv_netx90_mpw.Replace(LDFILE = 'src/netx90_mpw/netx90_mpw.ld')
 tSrc_netx90_mpw = tEnv_netx90_mpw.SetBuildPath('targets/netx90_mpw', 'src', sources_netx90_mpw)
 tElf_netx90_mpw = tEnv_netx90_mpw.Elf('targets/netx90_mpw/setup_dpm_netx90_mpw_intram.elf', tSrc_netx90_mpw + tEnv_netx90_mpw['PLATFORM_LIBRARY'])
 tTxt_netx90_mpw = tEnv_netx90_mpw.ObjDump('targets/netx90_mpw/setup_dpm_netx90_mpw_intram.txt', tElf_netx90_mpw, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
 tBin_netx90_mpw = tEnv_netx90_mpw.ObjCopy('targets/netx90_mpw/setup_dpm_netx90_mpw_intram.bin', tElf_netx90_mpw)
-tTmp_netx90_mpw = tEnv_netx90_mpw.GccSymbolTemplate('targets/netx90_mpw/snippet.xml', tElf_netx90_mpw, GCCSYMBOLTEMPLATE_TEMPLATE='templates/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx90_mpw[0])
+tTmp_netx90_mpw = tEnv_netx90_mpw.GccSymbolTemplate('targets/netx90_mpw/snippet.xml', tElf_netx90_mpw, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx90_mpw[0])
 
 # Create the snippet from the parameters.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
