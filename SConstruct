@@ -49,6 +49,7 @@ global PROJECT_VERSION
 #
 atEnv.DEFAULT.Version('#targets/version/version.h', 'templates/version.h')
 atEnv.DEFAULT.Version('#targets/hboot_snippet.xml', 'templates/hboot_snippet.xml')
+atEnv.DEFAULT.Version('#targets/hboot_snippet_4000.xml', 'templates/hboot_snippet_4000.xml')
 
 #----------------------------------------------------------------------------
 #
@@ -70,7 +71,7 @@ tSrc_netx4000_full = tEnv_netx4000_full.SetBuildPath('targets/netx4000_full', 's
 tElf_netx4000_full = tEnv_netx4000_full.Elf('targets/netx4000_full/setup_dpm_netx4000_full_intram.elf', tSrc_netx4000_full + tEnv_netx4000_full['PLATFORM_LIBRARY'])
 tTxt_netx4000_full = tEnv_netx4000_full.ObjDump('targets/netx4000_full/setup_dpm_netx4000_full_intram.txt', tElf_netx4000_full, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
 tBin_netx4000_full = tEnv_netx4000_full.ObjCopy('targets/netx4000_full/setup_dpm_netx4000_full_intram.bin', tElf_netx4000_full)
-tTmp_netx4000_full = tEnv_netx4000_full.GccSymbolTemplate('targets/netx4000_full/snippet.xml', tElf_netx4000_full, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_full[0])
+tTmp_netx4000_full = tEnv_netx4000_full.GccSymbolTemplate('targets/netx4000_full/snippet.xml', tElf_netx4000_full, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet_4000.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_full[0])
 
 # Create the snippet from the parameters.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
@@ -115,7 +116,7 @@ tSrc_netx4000_relaxed = tEnv_netx4000_relaxed.SetBuildPath('targets/netx4000_rel
 tElf_netx4000_relaxed = tEnv_netx4000_relaxed.Elf('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.elf', tSrc_netx4000_relaxed + tEnv_netx4000_relaxed['PLATFORM_LIBRARY'])
 tTxt_netx4000_relaxed = tEnv_netx4000_relaxed.ObjDump('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.txt', tElf_netx4000_relaxed, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
 tBin_netx4000_relaxed = tEnv_netx4000_relaxed.ObjCopy('targets/netx4000_relaxed/setup_dpm_netx4000_relaxed_intram.bin', tElf_netx4000_relaxed)
-tTmp_netx4000_relaxed = tEnv_netx4000_relaxed.GccSymbolTemplate('targets/netx4000_relaxed/snippet.xml', tElf_netx4000_relaxed, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_relaxed[0])
+tTmp_netx4000_relaxed = tEnv_netx4000_relaxed.GccSymbolTemplate('targets/netx4000_relaxed/snippet.xml', tElf_netx4000_relaxed, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet_4000.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_relaxed[0])
 
 # Create the snippet from the parameters.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
