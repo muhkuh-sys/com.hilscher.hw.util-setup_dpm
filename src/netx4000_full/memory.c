@@ -16,7 +16,6 @@
 #include "netx_io_areas.h"
 #include "options.h"
 #include "portcontrol.h"
-#include "trace.h"
 
 /* Do not use the real OTP fuses on the SCIT board. They can not be defined
  * completely and will trigger a security error in all cases.
@@ -197,7 +196,7 @@ MEM_NETX_DEV_T memory_setup_netx_sram(MEMORY_INTERFACE_T tInterface, unsigned in
 				ulValue  = g_t_romloader_options.tNetxCurrentSram.ulCtrl;
 				ulValue &= ~HOSTMSK(extsram0_ctrl_dwidth);
 				ulValue |= ulDWidth << HOSTSRT(extsram0_ctrl_dwidth);
-				trace_message_ul(TRACEMSG_Memory_SRAM_Control, ulValue);
+				//trace_message_ul(TRACEMSG_Memory_SRAM_Control, ulValue);
 				ptSRAMController->aulExtsram_ctrl[uiChipSelect] = ulValue;
 
 				/* Set the HIF IO configuration. */
@@ -212,9 +211,9 @@ MEM_NETX_DEV_T memory_setup_netx_sram(MEMORY_INTERFACE_T tInterface, unsigned in
 					ulValue &= ~HOSTMSK(hif_io_cfg_hif_mi_cfg);
 					ulValue |= ulMiCfg << HOSTSRT(hif_io_cfg_hif_mi_cfg);
 				}
-				trace_message_ul(TRACEMSG_Memory_hif_io_cfg, ulValue);
+				//trace_message_ul(TRACEMSG_Memory_hif_io_cfg, ulValue);
 				__IRQ_LOCK__;
-				ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;  /* @suppress("Assignment to itself") */
+				ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;    /* @suppress("Assignment to itself") */
 				ptHifIoCtrlArea->ulHif_io_cfg = ulValue;
 				__IRQ_UNLOCK__;
 
@@ -362,7 +361,7 @@ void memory_deactivate_netx_sram(MEMORY_INTERFACE_T tInterface, unsigned int uiC
 			ulValue &= ~HOSTMSK(hif_io_cfg_mem_mi_cfg);
 			ulValue |= 3U << HOSTSRT(hif_io_cfg_mem_mi_cfg);
 			__IRQ_LOCK__;
-			ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;  /* @suppress("Assignment to itself") */
+			ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;    /* @suppress("Assignment to itself") */
 			ptHifIoCtrlArea->ulHif_io_cfg = ulValue;
 			__IRQ_UNLOCK__;
 
@@ -379,7 +378,7 @@ void memory_deactivate_netx_sram(MEMORY_INTERFACE_T tInterface, unsigned int uiC
 			ulValue &= ~HOSTMSK(hif_io_cfg_hif_mi_cfg);
 			ulValue |= 3U << HOSTSRT(hif_io_cfg_hif_mi_cfg);
 			__IRQ_LOCK__;
-			ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;  /* @suppress("Assignment to itself") */
+			ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;    /* @suppress("Assignment to itself") */
 			ptHifIoCtrlArea->ulHif_io_cfg = ulValue;
 			__IRQ_UNLOCK__;
 
@@ -503,7 +502,7 @@ int memory_setup_sdram(MEMORY_INTERFACE_T tInterface)
 				}
 			}
 			__IRQ_LOCK__;
-			ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;  /* @suppress("Assignment to itself") */
+			ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;    /* @suppress("Assignment to itself") */
 			ptHifIoCtrlArea->ulHif_io_cfg = ulValue;
 			__IRQ_UNLOCK__;
 
@@ -637,7 +636,7 @@ int memory_setup_sram(MEMORY_INTERFACE_T tInterface, unsigned int uiChipSelect, 
 
 				/* Configure the HIF pins. */
 				__IRQ_LOCK__;
-				ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;  /* @suppress("Assignment to itself") */
+				ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key;    /* @suppress("Assignment to itself") */
 				ptHifIoCtrlArea->ulHif_io_cfg = g_t_romloader_options.t_hif_options.ulHifIoCfg;
 				__IRQ_UNLOCK__;
 
@@ -810,7 +809,7 @@ static int activate_ddr_clocks(void)
 		if( ulValue==0 )
 		{
 			/* No, the power can not be enabled. */
-			trace_message(TRACEMSG_Memory_DDR_PowerMaskedOut);
+			//trace_message(TRACEMSG_Memory_DDR_PowerMaskedOut);
 			iResult = -1;
 		}
 		else
@@ -833,7 +832,7 @@ static int activate_ddr_clocks(void)
 				iElapsed = cr7_global_timer_elapsed(&tHandle);
 				if( iElapsed!=0 )
 				{
-					trace_message_ul(TRACEMSG_Memory_DdrPowerNotActive, g_t_romloader_options.tDdrOptions.ulPowerUpTimeoutTicks);
+					//trace_message_ul(TRACEMSG_Memory_DdrPowerNotActive, g_t_romloader_options.tDdrOptions.ulPowerUpTimeoutTicks);
 					iResult = -1;
 					break;
 				}
@@ -866,7 +865,7 @@ static unsigned long memory_ddr_get_ul32(const unsigned char *pucScript)
 
 
 
-static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizScript)
+static int memory_ddr_execute_script(const unsigned char *pucScript, unsigned int sizScript)
 {
 	volatile unsigned long *pulDdrPhy  = (volatile unsigned long*)HOSTADDR(DDR_PHY);
 	volatile unsigned long *pulDdrCtrl = (volatile unsigned long*)HOSTADDR(DDR_CTRL);
@@ -875,7 +874,7 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 	unsigned char ucData;
 	int iResult;
 	DDR_SETUP_COMMAND_T tCommand;
-	size_t sizLeft;
+	unsigned int sizLeft;
 	unsigned int uiRegisterIndex;
 	unsigned long ulMask;
 	unsigned long ulData;
@@ -910,18 +909,18 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 		}
 		if( iResult!=0 )
 		{
-			trace_message_uc(TRACEMSG_Memory_DDR_script_invalid_command, ucData);
+			//trace_message_uc(TRACEMSG_Memory_DDR_script_invalid_command, ucData);
 		}
 		else
 		{
 			/* Get the number of bytes left in the script. */
-			sizLeft = (size_t)(pucEnd - pucCnt);
+			sizLeft = (unsigned int)(pucEnd - pucCnt);
 
 			tCommand = (DDR_SETUP_COMMAND_T)ucData;
 			switch( tCommand )
 			{
 			case DDR_SETUP_COMMAND_Nop:
-				trace_message(TRACEMSG_Memory_DDR_script_command_nop);
+				//trace_message(TRACEMSG_Memory_DDR_script_command_nop);
 				break;
 
 
@@ -932,12 +931,12 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 				 */
 				if( sizLeft<5 )
 				{
-					trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
+					//trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
 					iResult = -1;
 				}
 				else
 				{
-					trace_message_data(TRACEMSG_Memory_DDR_script_command_write_phy, pucCnt, 5);
+					//trace_message_data(TRACEMSG_Memory_DDR_script_command_write_phy, pucCnt, 5);
 
 					/* Get the register index. */
 					uiRegisterIndex = (unsigned int)(*(pucCnt++));
@@ -959,12 +958,12 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 				 */
 				if( sizLeft<5 )
 				{
-					trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
+					//trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
 					iResult = -1;
 				}
 				else
 				{
-					trace_message_data(TRACEMSG_Memory_DDR_script_command_write_ctrl, pucCnt, 5);
+					//trace_message_data(TRACEMSG_Memory_DDR_script_command_write_ctrl, pucCnt, 5);
 
 					/* Get the register index. */
 					uiRegisterIndex = (unsigned int)(*(pucCnt++));
@@ -985,12 +984,12 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 				 */
 				if( sizLeft<4 )
 				{
-					trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
+					//trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
 					iResult = -1;
 				}
 				else
 				{
-					trace_message_data(TRACEMSG_Memory_DDR_script_command_delay, pucCnt, 4);
+					//trace_message_data(TRACEMSG_Memory_DDR_script_command_delay, pucCnt, 4);
 
 					/* Get the timeout in ticks. */
 					ulTimeoutTicks = memory_ddr_get_ul32(pucCnt);
@@ -1011,12 +1010,12 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 				 */
 				if( sizLeft<13 )
 				{
-					trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
+					//trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
 					iResult = -1;
 				}
 				else
 				{
-					trace_message_data(TRACEMSG_Memory_DDR_script_command_poll_phy, pucCnt, 13);
+					//trace_message_data(TRACEMSG_Memory_DDR_script_command_poll_phy, pucCnt, 13);
 
 					/* Get the register index. */
 					uiRegisterIndex = (unsigned int)(*(pucCnt++));
@@ -1049,7 +1048,7 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 
 					if( iTimerHasElapsed!=0 )
 					{
-						trace_message(TRACEMSG_Memory_DDR_script_poll_timed_out);
+						//trace_message(TRACEMSG_Memory_DDR_script_poll_timed_out);
 						iResult = -1;
 					}
 				}
@@ -1065,12 +1064,12 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 				 */
 				if( sizLeft<13 )
 				{
-					trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
+					//trace_message(TRACEMSG_Memory_DDR_script_not_enough_bytes_left);
 					iResult = -1;
 				}
 				else
 				{
-					trace_message_data(TRACEMSG_Memory_DDR_script_command_poll_ctrl, pucCnt, 13);
+					//trace_message_data(TRACEMSG_Memory_DDR_script_command_poll_ctrl, pucCnt, 13);
 
 					/* Get the register index. */
 					uiRegisterIndex = (unsigned int)(*(pucCnt++));
@@ -1103,7 +1102,7 @@ static int memory_ddr_execute_script(const unsigned char *pucScript, size_t sizS
 
 					if( iTimerHasElapsed!=0 )
 					{
-						trace_message(TRACEMSG_Memory_DDR_script_poll_timed_out);
+						//trace_message(TRACEMSG_Memory_DDR_script_poll_timed_out);
 						iResult = -1;
 					}
 				}
@@ -1127,14 +1126,14 @@ int memory_setup_ddr(void)
 {
 	int iResult;
 	const unsigned char *pucScript;
-	size_t sizScript;
+	unsigned int sizScript;
 
 
 	/* An empty script is no error. */
 	iResult = 0;
 	pucScript = g_t_romloader_options.tDdrOptions.aucScript;
-	sizScript  = (size_t)( *(pucScript++) );
-	sizScript |= (size_t)((*(pucScript++))<<8);
+	sizScript  = (unsigned int)( *(pucScript++) );
+	sizScript |= (unsigned int)((*(pucScript++))<<8);
 	if( sizScript!=0 && (sizScript+2)<=sizeof(g_t_romloader_options.tDdrOptions.aucScript) )
 	{
 		iResult = activate_ddr_clocks();
@@ -1143,7 +1142,7 @@ int memory_setup_ddr(void)
 			iResult = memory_ddr_execute_script(pucScript, sizScript);
 			if( iResult==0 )
 			{
-				trace_message(TRACEMSG_Memory_DDR_setup_done);
+				//trace_message(TRACEMSG_Memory_DDR_setup_done);
 			}
 		}
 	}
