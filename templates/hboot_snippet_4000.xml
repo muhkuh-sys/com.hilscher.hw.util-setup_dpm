@@ -1,0 +1,10 @@
+<!-- Load the setup_dpm program. 
+${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_MICRO}.${PROJECT_VERSION_VCS} -->
+<Data>
+	<Hex address="${%LOAD_ADDRESS%}">
+${%PROGRAM_DATA%}
+	</Hex>
+</Data>
+<Execute>
+	<Address>${%EXECUTION_ADDRESS%}</Address>
+</Execute>
