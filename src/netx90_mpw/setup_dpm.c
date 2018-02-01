@@ -45,20 +45,21 @@ If R0 is not NULL:
 
 typedef struct STRUCT_DPM_CONFIGURATION
 {
-	unsigned long   ulDpmPioCfg1;
-	unsigned short  ulDpmPioCfg0;
-	unsigned char   ulDpmCfg0x0;
-	unsigned char   ulDpmAddrCfg;
-	unsigned char   ulDpmTimingCfg;
-	unsigned char   ulDpmRdyCfg;
-	unsigned char   ulDpmMiscCfg;
-	unsigned char   ulDpmIoCfgMisc;
+	unsigned long ulDpmCfg0x0;
+	unsigned long ulDpmIfCfg;
+	unsigned long ulDpmPioCfg0;
+	unsigned long ulDpmPioCfg1;
+	unsigned long ulDpmAddrCfg;
+	unsigned long ulDpmTimingCfg;
+	unsigned long ulDpmRdyCfg;
+	unsigned long ulDpmMiscCfg;
+	unsigned long ulDpmIoCfgMisc;
 } DPM_CONFIGURATION_T;
 
 typedef struct 
 {
-	unsigned char   ulIdpmCfg0x0;  
-	unsigned char   ulIdpmAddrCfg; 
+	unsigned long ulIdpmCfg0x0;  
+	unsigned long ulIdpmAddrCfg; 
 } IDPM_CONFIGURATION_T;
 
 
@@ -89,9 +90,10 @@ static const DEFAULT_HIF_CONFIG_T t_hif_options_default =
 	/* Set the serial DPM mode to 3. */
 	.ulHifIoCfg        = DFLT_VAL_NX90_hif_io_cfg | HOSTMSK(hif_io_cfg_sel_dpm_serial_spo) | HOSTMSK(hif_io_cfg_sel_dpm_serial_sph),
 	.tDpmConfig       = {
-		.ulDpmPioCfg1      = 0,
-		.ulDpmPioCfg0      = DFLT_VAL_NX90_dpm_pio_cfg0,
 		.ulDpmCfg0x0       = DFLT_VAL_NX90_dpm_cfg0x0,
+		.ulDpmIfCfg        = DFLT_VAL_NX90_dpm_if_cfg,
+		.ulDpmPioCfg0      = DFLT_VAL_NX90_dpm_pio_cfg0,
+		.ulDpmPioCfg1      = 0,
 		.ulDpmAddrCfg      = 7U << HOSTSRT(dpm_addr_cfg_addr_range),
 		.ulDpmTimingCfg    = DFLT_VAL_NX90_dpm_timing_cfg,
 		.ulDpmRdyCfg       = HOSTMSK(dpm_rdy_cfg_rdy_pol) | (1U << HOSTSRT(dpm_rdy_cfg_rdy_drv_mode)),
@@ -229,6 +231,7 @@ static void dpm_configure(HOSTADEF(DPM) *ptDpmArea, DPM_CONFIGURATION_T* ptDpmCo
 
 	/* configure DPM */
 	ptDpmArea->ulDpm_cfg0x0       = ptDpmConfig->ulDpmCfg0x0;
+	ptDpmArea->ulDpm_if_cfg       = ptDpmConfig->ulDpmIfCfg; 
 	ptDpmArea->ulDpm_addr_cfg     = ptDpmConfig->ulDpmAddrCfg;
 	ptDpmArea->ulDpm_timing_cfg   = ptDpmConfig->ulDpmTimingCfg;
 	ptDpmArea->ulDpm_rdy_cfg      = ptDpmConfig->ulDpmRdyCfg;
