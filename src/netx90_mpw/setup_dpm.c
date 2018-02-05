@@ -26,8 +26,6 @@ If R0 is not NULL:
    Disable DPM0, DPM1 and IDPM (clear the DPM mapping, init the 
    handshake area, clear pending IRQs.)
 4. Initialize DPM0, DPM1 and IDPM, if a configuration is present.
-   If no DPM is enabled in the configuration structure, configure
-   an IDPM with default values.
 5. Set HIF IO CFG to the value in the configuration.
 */
 
@@ -79,11 +77,6 @@ typedef struct
 	unsigned long ulHifIoCfg;
 	DPM_CONFIGURATION_T tDpmConfig;
 } DEFAULT_HIF_CONFIG_T;
-
-static const IDPM_CONFIGURATION_T tDefaultIdpmConfig= {
-	.ulIdpmCfg0x0 = 0x01,
-	.ulIdpmAddrCfg = 0x30
-};
 
 static const DEFAULT_HIF_CONFIG_T t_hif_options_default =
 {
@@ -610,14 +603,6 @@ int setup_console_mode_dpm(void)
 		{
 			idpm_configure(ptIdpmComArea, &(ptDpmConfigAll->tIdpmConfig));
 		}
-		
-		/* If no DPM is configured, enable the internal DPM. */
-		if ((ptDpmConfigAll->ulDPM0Enable == 0) &&
-			(ptDpmConfigAll->ulDPM1Enable == 0) &&
-			(ptDpmConfigAll->ulIDPMEnable == 0))
-			{
-				idpm_configure(ptIdpmComArea, &tDefaultIdpmConfig);
-			}
 		
 		/* Configure the HIF pins */
 		set_hif_io_config(ptDpmConfigAll->ulHifIoCfg);
