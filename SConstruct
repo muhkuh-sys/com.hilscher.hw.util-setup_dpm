@@ -164,14 +164,14 @@ tTmp_netx90_mpw = tEnv_netx90_mpw.GccSymbolTemplate('targets/netx90_mpw/snippet.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
 atSnippet_netx90_mpw = {
     'group': '.'.join(aArtifactGroupReverse),
-    'artifact': 'setup_dpm_netx90_mpw',
+    'artifact': 'setup_dpm_netx90MPW',
     'version': PROJECT_VERSION,
     'vcs_id': tEnv_netx90_mpw.Version_GetVcsIdLong(),
     'vcs_url': tEnv_netx90_mpw.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
     'author_name': 'Hilscher Gesellschaft für Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
-    'description': 'Setup the DPM on a netX90 MPW. The strapping options determine if the parallel or serial DPM should be configured.',
+    'description': 'Setup the DPM on a netX90 MPW. The strapping options or passed parameters determine if the parallel or serial DPM should be configured.',
     'categories': ['netx90', 'booting', 'DPM'],
     'parameter': {
         'CONFIGURATION_ADDRESS': {'help': 'The address of the hardware config.', 'default': 0}
