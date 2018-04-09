@@ -592,9 +592,8 @@ int setup_console_mode_dpm(void)
 		/* Configure all DPM blocks which are enabled in the configuration structure. */
 		if (ptDpmConfigAll->ulDPM0Enable != 0)
 		{
-			dpm_configure(ptDpm1ComArea, &(ptDpmConfigAll->tDpm1Config));
+			dpm_configure(ptDpm0ComArea, &(ptDpmConfigAll->tDpm0Config));
 		}
-		dpm_configure(ptDpm0ComArea, &(ptDpmConfigAll->tDpm0Config));
 		if (ptDpmConfigAll->ulDPM1Enable != 0)
 		{
 			dpm_configure(ptDpm1ComArea, &(ptDpmConfigAll->tDpm1Config));
