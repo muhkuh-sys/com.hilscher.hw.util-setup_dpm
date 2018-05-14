@@ -200,7 +200,7 @@ static void dpm_configure(HOSTADEF(DPM) *ptDpmArea, DPM_CONFIGURATION_T* ptDpmCo
 	/* DPM mapping:
 	 * 0x0000 - 0xffff : intramhs_dpm_mirror
 	 */
-	ptDpmArea->ulDpm_win1_end = 0x8000; /* 0x7fffU + 1; */
+	ptDpmArea->ulDpm_win1_end = 0U; /* 0x7fffU + 1; */
 	ulNetxAdr = HOSTADDR(intramhs_dpm_mirror);
 	ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(dpm_win1_map_win_map);
 	ulValue |= ulNetxAdr & HOSTMSK(dpm_win1_map_win_page);
@@ -242,7 +242,7 @@ static void idpm_configure(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_
 	/* DPM mapping:
 	 * 0x0000 - 0xffff : intramhs_dpm_mirror
 	 */
-	ptIdpmArea->ulIdpm_win1_end = 0x8000; /* 0x7fffU + 1; */
+	ptIdpmArea->ulIdpm_win1_end = 0U; /* 0x7fffU + 1; */ 
 	ulNetxAdr = HOSTADDR(intramhs_dpm_mirror);
 	ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(idpm_win1_map_win_map);
 	ulValue |= HOSTMSK(idpm_win1_map_wp_cfg_win);

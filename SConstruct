@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+90# -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------#
 #   Copyright (C) 2011 by Christoph Thelen                                #
 #   doc_bacardi@users.sourceforge.net                                     #
@@ -82,7 +82,7 @@ atSnippet_netx4000_full = {
     'vcs_id': tEnv_netx4000_full.Version_GetVcsIdLong(),
     'vcs_url': tEnv_netx4000_full.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
-    'author_name': 'Hilscher Gesellschaft für Systemautomation',
+    'author_name': 'Hilscher Gesellschaft fuer Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
     'description': 'Setup the DPM on a netX4000 FULL. The strapping options determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
     'categories': ['netx4000', 'booting', 'DPM'],
@@ -127,7 +127,7 @@ atSnippet_netx4000_relaxed = {
     'vcs_id': tEnv_netx4000_relaxed.Version_GetVcsIdLong(),
     'vcs_url': tEnv_netx4000_relaxed.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
-    'author_name': 'Hilscher Gesellschaft für Systemautomation',
+    'author_name': 'Hilscher Gesellschaft fuer Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
     'description': 'Setup the DPM on a netX4000 RELAXED. The strapping options determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
     'categories': ['netx4000', 'booting', 'DPM'],
@@ -164,12 +164,12 @@ tTmp_netx90_mpw = tEnv_netx90_mpw.GccSymbolTemplate('targets/netx90_mpw/snippet.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
 atSnippet_netx90_mpw = {
     'group': '.'.join(aArtifactGroupReverse),
-    'artifact': 'setup_dpm_netx90MPW',
+    'artifact': 'setup_dpm_netx90_MPW',
     'version': PROJECT_VERSION,
     'vcs_id': tEnv_netx90_mpw.Version_GetVcsIdLong(),
     'vcs_url': tEnv_netx90_mpw.Version_GetVcsUrl(),
     'license': 'GPL-2.0',
-    'author_name': 'Hilscher Gesellschaft für Systemautomation',
+    'author_name': 'Hilscher Gesellschaft fuer Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
     'description': 'Setup the DPM on a netX90 MPW. The strapping options or passed parameters determine if the parallel or serial DPM should be configured.',
     'categories': ['netx90', 'booting', 'DPM'],
