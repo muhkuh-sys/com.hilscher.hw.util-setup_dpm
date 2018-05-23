@@ -458,6 +458,9 @@ BOOTING_T boot_pcie(void)
 	if( tResult==BOOTING_Ok )
 	{
 		ptIdpm0Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
+		
+		/* Enable the IDPM */
+		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);		
 	}
 
 	return tResult;
