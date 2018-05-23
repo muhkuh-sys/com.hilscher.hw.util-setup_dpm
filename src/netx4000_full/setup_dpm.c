@@ -73,6 +73,11 @@ void start(void)
 	{
 		/* Get the boot mode. */
 		tBootMode = get_boot_mode();
+		
+		/* Always enable the IDPM - Please remove if handover parameter is added */
+		HOSTDEF(ptIdpm0Area);
+		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);		
+		
 		switch(tBootMode)
 		{
 		case BootModeLed_REE_SD:
