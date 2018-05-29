@@ -204,6 +204,8 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType)
 	case DPM_TRANSPORT_TYPE_Parallel:
 		/* Clear the serial DPM bit. */
 		ulValue &= ~HOSTMSK(hif_io_cfg_sel_dpm_serial);
+		/* Clear the en_hif_rdy_pio_mi bit. Use RDY/BUSY by default. */
+		ulValue &= ~HOSTMSK(hif_io_cfg_en_hif_rdy_pio_mi);
 		break;
 
 	case DPM_TRANSPORT_TYPE_Serial:
