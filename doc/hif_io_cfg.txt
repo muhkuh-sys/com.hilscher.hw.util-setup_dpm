@@ -1,0 +1,29 @@
+Make sure that hif_io_cfg is not changed when setup_dpm is called with parameters and DPM0/SPM0 and DPM1/SPM1 are NOT selected.
+
+(Based on Tag v1.1.6)
+
+The main routine at start branches into 
+- setup_console_mode_dpm if no parameters are given or into
+- setup_dpm_all if parameters are given.
+
+hif_io_cfg is only changed in set_hif_io_config.
+set_hif_io_config is called from setup_dpm_all only if DPM0/SPM0 or DPM1/SPM1 are selected.
+Other than that set_hif_io_config is only called via setup_console_mode_dpm.
+
+void start(HIF_CONFIG_T* ptDpmConfig)
+	if (ptDpmConfig == NULL)
+	{
+		iResult = setup_console_mode_dpm();
+	}
+	
+setup_console_mode_dpm
+	init_default_pdpm
+		init_dpm
+	init_default_sdpm
+		init_dpm
+	
+init_dpm
+	dpm_deinit_registers
+		set_hif_io_config(HOSTDFLT(hif_io_cfg));
+	set_hif_io_config(t_hif_options.ulHifIoCfg);
+	
