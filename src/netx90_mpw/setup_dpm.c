@@ -22,11 +22,15 @@ If R0 is not NULL:
 1. Enable the DPM clock.
    If it cannot be enabled, exit with an error.
 2. Clear the intram HS area and put the DPM cookie at the beginning.
-3. Set HIF IO CFG to the reset value.
+3. Set HIF IO CFG to the reset value if DPM0/SPM0 or SPM1 are selected.
    Disable DPM0, DPM1 and IDPM (clear the DPM mapping, init the 
    handshake area, clear pending IRQs.)
 4. Initialize DPM0, DPM1 and IDPM, if a configuration is present.
-5. Set HIF IO CFG to the value in the configuration.
+5. Set HIF IO CFG to the value in the configuration, if DPM0/SPM0 
+   or DPM1/SPM1 are activated.
+   
+Note: The value for hif_io_cfg in the parameters is only written to the register 
+      if either DPM0/SPM0 or DPM1/SPM1 is configured. Otherwise, it remains unchanged.
 */
 
 #include <string.h>
@@ -573,8 +577,11 @@ int setup_console_mode_dpm(void)
 	iResult = enable_dpm_clock();
 	if (iResult==0)
 	{
-		/* Configure the HIF pins to default. */
-		set_hif_io_config(HOSTDFLT(hif_io_cfg));
+		/* Configure the HIF pins to default if DPM0/SPM0 or SPM1 are selected. */
+		if ((ptDpmConfigAll->ulDPM0Enable != 0) || (ptDpmConfigAll->ulDPM1Enable != 0))
+		{
+			set_hif_io_config(HOSTDFLT(hif_io_cfg));
+		}
 		
 		/* Disable all windows and write protect them. */
 		/* Disable the tunnel and write protect it. */
@@ -603,8 +610,11 @@ int setup_console_mode_dpm(void)
 			idpm_configure(ptIdpmComArea, &(ptDpmConfigAll->tIdpmConfig));
 		}
 		
-		/* Configure the HIF pins */
-		set_hif_io_config(ptDpmConfigAll->ulHifIoCfg);
+		/* Configure the HIF pins if DPM0/SPM0 or SPM1 are selected. */
+		if ((ptDpmConfigAll->ulDPM0Enable != 0) || (ptDpmConfigAll->ulDPM1Enable != 0))
+		{
+			set_hif_io_config(ptDpmConfigAll->ulHifIoCfg);
+		}
 	}
 	
 	return iResult;
