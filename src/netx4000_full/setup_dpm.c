@@ -58,8 +58,52 @@ extern ROMVECTOR_T tRomVector;
 #define ROMVECTOR_INFO_netX4000_FULL 0x0010b004
 
 
-void __attribute__ ((section (".init_code"))) start(void);
-void start(void)
+
+typedef struct STRUCT_DPM_CONFIGURATION
+{
+	unsigned long ulDpmCfg0x0;
+	unsigned long ulDpmIfCfg;
+	unsigned long ulDpmPioCfg0;
+	unsigned long ulDpmPioCfg1;
+	unsigned long ulDpmAddrCfg;
+	unsigned long ulDpmTimingCfg;
+	unsigned long ulDpmRdyCfg;
+	unsigned long ulDpmMiscCfg;
+	unsigned long ulDpmIoCfgMisc;
+} DPM_CONFIGURATION_T;
+
+typedef struct 
+{
+	unsigned long ulIdpmCfg0x0;  
+	unsigned long ulIdpmAddrCfg; 
+} IDPM_CONFIGURATION_T;
+
+
+typedef struct
+{
+	unsigned long ulHifIoCfg;
+	unsigned long ulDPM0Enable;
+	DPM_CONFIGURATION_T tDpm0Config;
+	unsigned long ulDPM1Enable;
+	DPM_CONFIGURATION_T tDpm1Config;
+	unsigned long ulIDPMEnable;
+	IDPM_CONFIGURATION_T tIdpmConfig;
+} HIF_CONFIG_T;
+
+typedef struct
+{
+	unsigned long ulHifIoCfg;
+	DPM_CONFIGURATION_T tDpmConfig;
+} DEFAULT_HIF_CONFIG_T;
+
+
+
+
+
+
+
+void __attribute__ ((section (".init_code"))) start(HIF_CONFIG_T* ptDpmConfig);
+void start(HIF_CONFIG_T* ptDpmConfig)
 {
 	int iResult;
 	BOOT_MODE_LED_T tBootMode;
@@ -71,8 +115,31 @@ void start(void)
 	/* Detect if this is really a FULL chip. */
 	if( tRomVector.ulInfo==ROMVECTOR_INFO_netX4000_FULL )
 	{
-		/* Get the boot mode. */
-		tBootMode = get_boot_mode();
+
+    /* check first parameter (pointer) for following options */
+	/* 0 => default behaviour => get boot option from external pins  */
+	/* the numbers are translated from the hand over parameter (boot parameter) to the firmware */
+    /* 1 =>	BootModeLed_netX_HIF_DPM_serial    => 1                  */
+	/* 7 => BootModeLed_REE_DPM_PCIE           => 4                  */
+	/* 4 => BootModeLed_netX_HIF_DPM_parallel  => 5                  */
+	
+        if (ptDpmConfig == (HIF_CONFIG_T*)1)
+		{
+			tBootMode = BootModeLed_netX_HIF_DPM_serial;
+		}
+     	else if (ptDpmConfig == (HIF_CONFIG_T*)7)
+		{
+			tBootMode = BootModeLed_REE_DPM_PCIE;
+		}
+     	else if (ptDpmConfig == (HIF_CONFIG_T*)4)
+		{
+			tBootMode = BootModeLed_netX_HIF_DPM_parallel;
+		} else 
+    	{
+    		/* Get the boot mode. */
+    		tBootMode = get_boot_mode();
+    	} 			
+
 		
 		/* Always enable the IDPM - Please remove if handover parameter is added */
 		HOSTDEF(ptIdpm0Area);
