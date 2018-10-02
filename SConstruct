@@ -71,7 +71,7 @@ tSrc_netx4000_full = tEnv_netx4000_full.SetBuildPath('targets/netx4000_full', 's
 tElf_netx4000_full = tEnv_netx4000_full.Elf('targets/netx4000_full/setup_dpm_netx4000_full_intram.elf', tSrc_netx4000_full + tEnv_netx4000_full['PLATFORM_LIBRARY'])
 tTxt_netx4000_full = tEnv_netx4000_full.ObjDump('targets/netx4000_full/setup_dpm_netx4000_full_intram.txt', tElf_netx4000_full, OBJDUMP_FLAGS=['--disassemble', '--source', '--all-headers', '--wide'])
 tBin_netx4000_full = tEnv_netx4000_full.ObjCopy('targets/netx4000_full/setup_dpm_netx4000_full_intram.bin', tElf_netx4000_full)
-tTmp_netx4000_full = tEnv_netx4000_full.GccSymbolTemplate('targets/netx4000_full/snippet.xml', tElf_netx4000_full, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet_4000.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_full[0])
+tTmp_netx4000_full = tEnv_netx4000_full.GccSymbolTemplate('targets/netx4000_full/snippet.xml', tElf_netx4000_full, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_full[0])
 
 # Create the snippet from the parameters.
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
@@ -84,9 +84,10 @@ atSnippet_netx4000_full = {
     'license': 'GPL-2.0',
     'author_name': 'Hilscher Gesellschaft fuer Systemautomation',
     'author_url': 'https://github.com/muhkuh-sys',
-    'description': 'Setup the DPM on a netX4000 FULL. The strapping options determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
+    'description': 'Setup the DPM on a netX4000 FULL. The strapping options or the parameter R0 determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
     'categories': ['netx4000', 'booting', 'DPM'],
     'parameter': {
+        'CONFIGURATION_ADDRESS': {'help': 'The address of the hardware config.', 'default': 0}
     }
 }
 strArtifactPath_netx4000_full = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet_netx4000_full['artifact'], PROJECT_VERSION)
