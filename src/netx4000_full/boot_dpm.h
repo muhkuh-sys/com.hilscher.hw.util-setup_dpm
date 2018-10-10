@@ -9,6 +9,7 @@
 
 #include "boot_common.h"
 #include "netx_io_areas.h"
+#include "setup_dpm.h"
 
 #ifndef __BOOT_DPM_H__
 #define __BOOT_DPM_H__
@@ -159,9 +160,9 @@ extern BOOT_PCIE_AREA_T tBootPcieArea;
 /*-------------------------------------------------------------------------*/
 
 
-BOOTING_T boot_dpm(DPM_TRANSPORT_TYPE_T tDpmTransportType);
-BOOTING_T boot_idpm(void);
-BOOTING_T boot_pcie(void);
+BOOTING_T boot_dpm(DPM_TRANSPORT_TYPE_T tDpmTransportType, HIF_CONFIG_T* ptDpmConfig);
+//BOOTING_T boot_idpm(void);
+BOOTING_T boot_pcie(int idpm);
 
 
 /*-----------------------------------*/

@@ -2,10 +2,23 @@
 #include <string.h>
 
 #include "boot_common.h"
-#include "boot_dpm.h"
+
+#if ASIC_TYP==ASIC_TYP_NETX4000_FULL
+#include "netx4000_full/boot_dpm.h"
+#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
+#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
+#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
+#elif ASIC_TYP==ASIC_TYP_NETX4000_RELAXED
+#include "netx4000_relaxed/boot_dpm.h"
+#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
+#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
+#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
+#endif
+
 #include "netx_io_areas.h"
 #include "rdy_run.h"
 #include "systime.h"
+#include "setup_dpm.h"
 
 /*-------------------------------------------------------------------------*/
 
@@ -13,13 +26,7 @@
  * They define the position of the boot mode pins in the
  * ASR_ID registers.
  */
-#define ASRID_MASK_BootMode 0x000000ffU
-#define ASRID_BOFF_BootMode 0
-#define ASRID_DOFF_BootMode 1
-#define ASRID_BSIZ_BootMode 8
 
-#define MSK_ASRID_BootMode_Pins        0x0000001cU
-#define SRT_ASRID_BootMode_Pins        2
 
 
 static BOOT_MODE_LED_T get_boot_mode(void)
@@ -44,66 +51,164 @@ static BOOT_MODE_LED_T get_boot_mode(void)
 	return tBootMode;
 }
 
-
-
-typedef struct
+/* Reset all IRQ bits. */
+static void clear_idpm_irqs_(HOSTADEF(IDPM) *ptIdpmArea)
 {
-	/* This is the vector table at the start of the ROM. */
-	unsigned long aulVectorTable[8];
-	/* Version and chip type. */
-	unsigned long ulInfo;
-} ROMVECTOR_T;
+	//ptIdpmArea->ulIdpm_irq_host_mask_reset = 0xffffffff;
+	//ptIdpmArea->ulIdpm_firmware_irq_mask = 0;
+	ptIdpmArea->ulIdpm_irq_pci_inta_mask_reset = 0xffffffff;
+	ptIdpmArea->ulIdpm_firmware_irq_mask = 0;
+}
 
-extern ROMVECTOR_T tRomVector;
-#define ROMVECTOR_INFO_netX4000_FULL 0x0010b004
-
-
-
-typedef struct STRUCT_DPM_CONFIGURATION
+static void deinit_idpm_mapping_(HOSTADEF(IDPM) *ptIdpmArea)
 {
-	unsigned long ulDpmCfg0x0;
-	unsigned long ulDpmIfCfg;
-	unsigned long ulDpmPioCfg0;
-	unsigned long ulDpmPioCfg1;
-	unsigned long ulDpmAddrCfg;
-	unsigned long ulDpmTimingCfg;
-	unsigned long ulDpmRdyCfg;
-	unsigned long ulDpmMiscCfg;
-	unsigned long ulDpmIoCfgMisc;
-} DPM_CONFIGURATION_T;
+	/* Disable all windows and write protect them. */
+	ptIdpmArea->ulIdpm_win1_end = 0U;
+	ptIdpmArea->ulIdpm_win1_map = HOSTMSK(idpm_win1_map_wp_cfg_win);
+	ptIdpmArea->ulIdpm_win2_end = 0U;
+	ptIdpmArea->ulIdpm_win2_map = 0U;
+	ptIdpmArea->ulIdpm_win3_end = 0U;
+	ptIdpmArea->ulIdpm_win3_map = 0U;
+	ptIdpmArea->ulIdpm_win4_end = 0U;
+	ptIdpmArea->ulIdpm_win4_map = 0U;
 
-typedef struct 
+	/* Disable the tunnel and write protect it. */
+	ptIdpmArea->ulIdpm_tunnel_cfg = HOSTMSK(idpm_tunnel_cfg_wp_cfg_win);
+}
+
+static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_T* ptIdpmConfig)
 {
-	unsigned long ulIdpmCfg0x0;  
-	unsigned long ulIdpmAddrCfg; 
-} IDPM_CONFIGURATION_T;
+	unsigned long ulNetxAdr;
+	unsigned long ulValue;
+
+	/* DPM mapping:
+	 * 0x0000 - 0xffff : intramhs_dpm_mirror
+	 */
+
+	ptIdpmArea->ulIdpm_win1_end = 0U; /* 0x7fffU + 1; */
+	ulNetxAdr = HOSTADDR(intramhs_dpm_mirror);
+	ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(idpm_win1_map_win_map);
+	ulValue |= HOSTMSK(idpm_win1_map_wp_cfg_win);
+	ptIdpmArea->ulIdpm_win1_map = ulValue;
+
+	ptIdpmArea->ulIdpm_win2_end = 0U;
+	ptIdpmArea->ulIdpm_win2_map = 0U;
+
+	ptIdpmArea->ulIdpm_win3_end = 0U;
+	ptIdpmArea->ulIdpm_win3_map = 0U;
+
+	ptIdpmArea->ulIdpm_win4_end = 0U;
+	ptIdpmArea->ulIdpm_win4_map = 0U;
+	/*
+	ptIdpmArea->ulIdpm_win1_end = ptIdpmConfig->ulIdpm_win1_end;
+	ptIdpmArea->ulIdpm_win1_map = ptIdpmConfig->ulIdpm_win1_map;
+
+	ptIdpmArea->ulIdpm_win2_end = ptIdpmConfig->ulIdpm_win2_end;
+	ptIdpmArea->ulIdpm_win2_map = ptIdpmConfig->ulIdpm_win2_map;
+
+	ptIdpmArea->ulIdpm_win3_end = ptIdpmConfig->ulIdpm_win3_end;
+	ptIdpmArea->ulIdpm_win3_map = ptIdpmConfig->ulIdpm_win3_map;
+
+	ptIdpmArea->ulIdpm_win4_end = ptIdpmConfig->ulIdpm_win4_end;
+	ptIdpmArea->ulIdpm_win4_map = ptIdpmConfig->ulIdpm_win4_map;
+	 */
+
+	/* Disable the tunnel and write protect it. */
+	ptIdpmArea->ulIdpm_tunnel_cfg = HOSTMSK(idpm_tunnel_cfg_wp_cfg_win);
+
+	/* configure DPM */
+	ptIdpmArea->ulIdpm_cfg0x0       = ptIdpmConfig->ulIdpmCfg0x0;
+	ptIdpmArea->ulIdpm_addr_cfg     = ptIdpmConfig->ulIdpmAddrCfg;
 
 
-typedef struct
+}
+
+BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig);
+BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig)
 {
-	unsigned long ulHifIoCfg;
-	unsigned long ulDPM0Enable;
-	DPM_CONFIGURATION_T tDpm0Config;
-	unsigned long ulDPM1Enable;
-	DPM_CONFIGURATION_T tDpm1Config;
-	unsigned long ulIDPMEnable;
-	IDPM_CONFIGURATION_T tIdpmConfig;
-} HIF_CONFIG_T;
+	BOOTING_T iResult = 0;
 
-typedef struct
+	deinit_idpm_mapping_(ptIdpmArea);
+
+	clear_idpm_irqs_(ptIdpmArea);
+
+	idpm_configure_(ptIdpmArea,ptIdpmConfig);
+
+	return iResult;
+}
+
+
+
+
+
+
+
+BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll);
+BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 {
-	unsigned long ulHifIoCfg;
-	DPM_CONFIGURATION_T tDpmConfig;
-} DEFAULT_HIF_CONFIG_T;
+	BOOTING_T iResult = 0;
+	HOSTDEF(ptIdpm0Area);
+	HOSTDEF(ptIdpm1Area);
+
+	/*check ulDPMEnable for boot options of DPM*/
+	switch(ptDpmConfigAll->ulDPMEnable)
+	{
+	default:
+	case 0:
+		/*DO NOTHING*/
+		break;
+	case 1:
+		iResult = boot_dpm(DPM_TRANSPORT_TYPE_Parallel, ptDpmConfigAll);
+		break;
+	case 2:
+		iResult = boot_dpm(DPM_TRANSPORT_TYPE_Serial, ptDpmConfigAll);
+		break;
+	}
+
+	/*check ulIDPM0Enable for boot options of IDPM0*/
+	switch(ptDpmConfigAll->ulIDPM0Enable)
+	{
+	default:
+	case 0:
+		/*DO NOTHING*/
+		break;
+	case 1:
+		/*boot idpm0 as pcie*/
+		iResult = boot_pcie(IDPM0);
+		break;
+	case 2:
+		/*TO DO*/
+		/*boot idpm0 only*/
+		boot_idpm(ptIdpm0Area, &ptDpmConfigAll->tIdpm0Config);
+		break;
+	}
+
+	/*check ulIDPM0Enable for boot options of IDPM0*/
+	switch(ptDpmConfigAll->ulIDPM1Enable)
+	{
+	default:
+	case 0:
+		/*DO NOTHING*/
+		break;
+	case 1:
+		/*TO DO*/
+		/*boot idpm1 as pcie*/
+		iResult = boot_pcie(IDPM1);
+		break;
+	case 2:
+		/*TO DO*/
+		/*boot idpm1 only*/
+		boot_idpm(ptIdpm1Area, &ptDpmConfigAll->tIdpm1Config);
+		break;
+	}
+
+	return iResult;
+}
 
 
 
-
-
-
-
-void __attribute__ ((section (".init_code"))) start(HIF_CONFIG_T* ptDpmConfig);
-void start(HIF_CONFIG_T* ptDpmConfig)
+int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig);
+int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig)
 {
 	int iResult;
 	BOOT_MODE_LED_T tBootMode;
@@ -143,7 +248,10 @@ void start(HIF_CONFIG_T* ptDpmConfig)
 		
 		/* Always enable the IDPM - Please remove if handover parameter is added */
 		HOSTDEF(ptIdpm0Area);
-		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);		
+		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
+
+		HOSTDEF(ptIdpm1Area);
+		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		
 		switch(tBootMode)
 		{
@@ -154,7 +262,7 @@ void start(HIF_CONFIG_T* ptDpmConfig)
 
 		case BootModeLed_netX_HIF_DPM_serial:
 			/* Setup the serial DPM. */
-			tResult = boot_dpm(DPM_TRANSPORT_TYPE_Serial);
+			tResult = boot_dpm(DPM_TRANSPORT_TYPE_Serial, NULL);
 			if( tResult==BOOTING_Ok )
 			{
 				iResult = 0;
@@ -169,7 +277,7 @@ void start(HIF_CONFIG_T* ptDpmConfig)
 
 		case BootModeLed_REE_DPM_PCIE:
 			/* Setup the PCI express DPM. */
-			tResult = boot_pcie();
+			tResult = boot_pcie(IDPM0);
 			if( tResult==BOOTING_Ok )
 			{
 				iResult = 0;
@@ -178,7 +286,7 @@ void start(HIF_CONFIG_T* ptDpmConfig)
 
 		case BootModeLed_netX_HIF_DPM_parallel:
 			/* Setup the parallel DPM. */
-			tResult = boot_dpm(DPM_TRANSPORT_TYPE_Parallel);
+			tResult = boot_dpm(DPM_TRANSPORT_TYPE_Parallel, NULL);
 			if( tResult==BOOTING_Ok )
 			{
 				iResult = 0;
@@ -191,6 +299,23 @@ void start(HIF_CONFIG_T* ptDpmConfig)
 			iResult = 0;
 			break;
 		}
+	}
+
+	return iResult;
+}
+
+void __attribute__ ((section (".init_code"))) start(HIF_CONFIG_T* ptDpmConfig);
+void start(HIF_CONFIG_T* ptDpmConfig)
+{
+	int iResult;
+
+	if(ptDpmConfig == NULL || ptDpmConfig < (HIF_CONFIG_T*)0x04000000)
+	{
+		iResult = setup_boot_mode_dpm(ptDpmConfig);
+	}
+	else
+	{
+		iResult = setup_dpm_all(ptDpmConfig);
 	}
 
 	if( iResult!=0 )

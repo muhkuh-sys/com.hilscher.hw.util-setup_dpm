@@ -636,6 +636,7 @@ void start(HIF_CONFIG_T* ptDpmConfig)
 	}
 	else
 	{
+
 		iResult = setup_dpm_all(ptDpmConfig); 
 	}
 	
