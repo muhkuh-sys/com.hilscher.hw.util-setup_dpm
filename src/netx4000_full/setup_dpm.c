@@ -5,15 +5,19 @@
 
 #if ASIC_TYP==ASIC_TYP_NETX4000_FULL
 #include "netx4000_full/boot_dpm.h"
-#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
-#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
-#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
+
 #elif ASIC_TYP==ASIC_TYP_NETX4000_RELAXED
 #include "netx4000_relaxed/boot_dpm.h"
+
+#endif
+
+
+//#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
+//#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
+//#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
 #define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
 #define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
 #define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
-#endif
 
 #include "netx_io_areas.h"
 #include "rdy_run.h"

@@ -13,12 +13,12 @@
 #include "setup_dpm.h"
 #include "options.h"
 
-//#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
-//#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
-//#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
-#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
-#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
-#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
+#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
+#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
+#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
+//#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
+//#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
+//#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
 
 /*---------------------------------------------------------------------------*/
 
