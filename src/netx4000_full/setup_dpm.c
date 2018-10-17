@@ -18,6 +18,7 @@
 #define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
 #define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
 #define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
+#define MESSAGE_IDPM     	 "netX4000 RELAXED IDPM"
 
 #include "netx_io_areas.h"
 #include "rdy_run.h"
@@ -80,7 +81,7 @@ static void deinit_idpm_mapping_(HOSTADEF(IDPM) *ptIdpmArea)
 	ptIdpmArea->ulIdpm_tunnel_cfg = HOSTMSK(idpm_tunnel_cfg_wp_cfg_win);
 }
 
-static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_T* ptIdpmConfig)
+static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm)
 {
 	unsigned long ulNetxAdr;
 	unsigned long ulValue;
@@ -90,7 +91,15 @@ static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION
 	 */
 
 	ptIdpmArea->ulIdpm_win1_end = 0U; /* 0x7fffU + 1; */
-	ulNetxAdr = HOSTADDR(intramhs_dpm_mirror);
+
+	switch(idpm){
+		case 0:
+			ulNetxAdr = HOSTADDR(intramhs0_dpm_mirror);
+		break;
+		case 1:
+			ulNetxAdr = HOSTADDR(intramhs1_dpm_mirror);
+		break;
+	}
 	ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(idpm_win1_map_win_map);
 	ulValue |= HOSTMSK(idpm_win1_map_wp_cfg_win);
 	ptIdpmArea->ulIdpm_win1_map = ulValue;
@@ -103,6 +112,7 @@ static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION
 
 	ptIdpmArea->ulIdpm_win4_end = 0U;
 	ptIdpmArea->ulIdpm_win4_map = 0U;
+
 	/*
 	ptIdpmArea->ulIdpm_win1_end = ptIdpmConfig->ulIdpm_win1_end;
 	ptIdpmArea->ulIdpm_win1_map = ptIdpmConfig->ulIdpm_win1_map;
@@ -122,21 +132,78 @@ static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION
 
 	/* configure DPM */
 	ptIdpmArea->ulIdpm_cfg0x0       = ptIdpmConfig->ulIdpmCfg0x0;
-	ptIdpmArea->ulIdpm_addr_cfg     = ptIdpmConfig->ulIdpmAddrCfg;
-
+	ptIdpmArea->ulIdpm_addr_cfg       = ptIdpmConfig->ulIdpmAddrCfg;
 
 }
 
-BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig);
-BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig)
+static void init_intramhs(unsigned int idpm)
 {
+	void *pvDPM;
+	switch(idpm){
+	case 0:
+		pvDPM = (void*)HOSTADDR(intramhs0_straight_mirror);
+		break;
+	case 1:
+		pvDPM = (void*)HOSTADDR(intramhs1_straight_mirror);
+	break;
+	}
+	memset(pvDPM, 0, 32768);
+	memcpy(pvDPM, MESSAGE_IDPM, sizeof(MESSAGE_IDPM));
+}
+
+static void init_handshake_area(NX4000_HANDSHAKE_CTRL_AREA_T* ptHandshakeCtrlArea)
+{
+	unsigned int sizCnt;
+
+	/* Read all handshake registers and disable them. */
+	sizCnt = sizeof(ptHandshakeCtrlArea->aulHandshake_hsc_ctrl)/sizeof(unsigned long);
+	do
+	{
+		ptHandshakeCtrlArea->aulHandshake_hsc_ctrl[--sizCnt] = 0;
+	} while( sizCnt!=0 );
+
+	/* Disable all handshake IRQs. */
+	ptHandshakeCtrlArea->ulHandshake_dpm_irq_raw_clear = 0xffffffff;
+	ptHandshakeCtrlArea->ulHandshake_dpm_irq_msk_reset = 0xffffffff;
+	ptHandshakeCtrlArea->ulHandshake_arm_irq_raw_clear = 0xffffffff;
+	ptHandshakeCtrlArea->ulHandshake_arm_irq_msk_reset = 0xffffffff;
+	ptHandshakeCtrlArea->ulHandshake_xpic_irq_raw_clear = 0xffffffff;
+	ptHandshakeCtrlArea->ulHandshake_xpic_irq_msk_reset = 0xffffffff;
+
+	sizCnt = sizeof(ptHandshakeCtrlArea->asHandshake_buf_man)/sizeof(ptHandshakeCtrlArea->asHandshake_buf_man[0]);
+	do
+	{
+		--sizCnt;
+		ptHandshakeCtrlArea->asHandshake_buf_man[sizCnt].ulCtrl = HOSTDFLT(handshake_buf_man0_ctrl);
+		ptHandshakeCtrlArea->asHandshake_buf_man[sizCnt].ulStatus_ctrl_netx = HOSTDFLT(handshake_buf_man0_status_ctrl_netx);
+		ptHandshakeCtrlArea->asHandshake_buf_man[sizCnt].ulWin_map = 0;
+	} while( sizCnt!=0 );
+}
+
+BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm);
+BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm)
+{
+	HOSTDEF(ptHandshakeCtrl0Area);
+	HOSTDEF(ptHandshakeCtrl1Area);
+
 	BOOTING_T iResult = 0;
+
+	init_intramhs(idpm);
 
 	deinit_idpm_mapping_(ptIdpmArea);
 
+	switch(idpm){
+	case 0:
+		init_handshake_area(ptHandshakeCtrl0Area);
+		break;
+	case 1:
+		init_handshake_area(ptHandshakeCtrl1Area);
+		break;
+	}
+
 	clear_idpm_irqs_(ptIdpmArea);
 
-	idpm_configure_(ptIdpmArea,ptIdpmConfig);
+	idpm_configure_(ptIdpmArea, ptIdpmConfig, idpm);
 
 	return iResult;
 }
@@ -169,6 +236,8 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		break;
 	}
 
+
+
 	/*check ulIDPM0Enable for boot options of IDPM0*/
 	switch(ptDpmConfigAll->ulIDPM0Enable)
 	{
@@ -177,13 +246,15 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		/*DO NOTHING*/
 		break;
 	case 1:
+		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		/*boot idpm0 as pcie*/
 		iResult = boot_pcie(IDPM0);
+
 		break;
 	case 2:
-		/*TO DO*/
+		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		/*boot idpm0 only*/
-		boot_idpm(ptIdpm0Area, &ptDpmConfigAll->tIdpm0Config);
+		boot_idpm(ptIdpm0Area, &ptDpmConfigAll->tIdpm0Config, IDPM0);
 		break;
 	}
 
@@ -195,14 +266,14 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		/*DO NOTHING*/
 		break;
 	case 1:
-		/*TO DO*/
-		/*boot idpm1 as pcie*/
-		iResult = boot_pcie(IDPM1);
+//		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
+//		/*boot idpm1 as pcie*/
+//		iResult = boot_pcie(IDPM1);
 		break;
 	case 2:
-		/*TO DO*/
+		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		/*boot idpm1 only*/
-		boot_idpm(ptIdpm1Area, &ptDpmConfigAll->tIdpm1Config);
+		boot_idpm(ptIdpm1Area, &ptDpmConfigAll->tIdpm1Config, IDPM1);
 		break;
 	}
 
@@ -254,8 +325,8 @@ int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig)
 		HOSTDEF(ptIdpm0Area);
 		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 
-		HOSTDEF(ptIdpm1Area);
-		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
+//		HOSTDEF(ptIdpm1Area);
+//		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		
 		switch(tBootMode)
 		{

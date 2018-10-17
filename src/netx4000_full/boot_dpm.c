@@ -16,6 +16,7 @@
 #define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
 #define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
 #define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
+#define MESSAGE_IDPM     	 "netX4000 RELAXED IDPM"
 //#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
 //#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
 //#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
@@ -448,8 +449,7 @@ BOOTING_T boot_dpm(DPM_TRANSPORT_TYPE_T tDpmTransportType,
 	BOOTING_T tResult;
 
 	/* Can the DPM clocks be enabled? */
-	if ((ptAsicCtrlArea->ulClock_enable_mask & HOSTMSK(clock_enable_dpm))
-			== 0) {
+	if ((ptAsicCtrlArea->ulClock_enable_mask & HOSTMSK(clock_enable_dpm))== 0) {
 		/* No, the clocks can not be enabled. */
 //		trace_message(TRACEMSG_DPM_DpmClocksMaskedOut);
 		tResult = BOOTING_Not_Allowed;
@@ -475,7 +475,15 @@ BOOTING_T boot_pcie(int idpm) {
 	 */
 
 	/* Leave a message in the DPM. */
-	pvDPM = (void*) HOSTADDR(intramhs_straight_mirror);
+	switch (idpm) {
+	case 0:
+		pvDPM = (void*) HOSTADDR(intramhs0_straight_mirror);
+		break;
+	case 1:
+		pvDPM = (void*) HOSTADDR(intramhs1_straight_mirror);
+		break;
+	}
+
 	memset(pvDPM, 0, 65536);
 	memcpy(pvDPM, MESSAGE_DPM_PCIE, sizeof(MESSAGE_DPM_PCIE));
 
@@ -484,12 +492,10 @@ BOOTING_T boot_pcie(int idpm) {
 	if (tResult == BOOTING_Ok) {
 		switch (idpm) {
 		case 0:
-			ptIdpm0Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(
-					idpm_irq_pci_inta_mask_set_firmware);
+			ptIdpm0Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
 			break;
 		case 1:
-			ptIdpm1Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(
-					idpm_irq_pci_inta_mask_set_firmware);
+			ptIdpm1Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
 			break;
 		default:
 			break;
