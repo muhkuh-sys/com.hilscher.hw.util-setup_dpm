@@ -92,8 +92,7 @@ static void dpm_deinit_registers(void) {
 
 /*---------------------------------------------------------------------------*/
 
-static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType,
-		HIF_CONFIG_T* ptDpmConfig) {
+static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType, HIF_CONFIG_T* ptDpmConfig) {
 	HOSTDEF(ptAsicCtrlArea);
 	HOSTDEF(ptDpmArea);
 	HOSTDEF(ptHifIoCtrlArea);
@@ -106,8 +105,7 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType,
 	ulValue |= HOSTMSK(clock_enable_dpm);
 	__IRQ_LOCK__
 	;
-	ptAsicCtrlArea->ulAsic_ctrl_access_key =
-			ptAsicCtrlArea->ulAsic_ctrl_access_key; /* @suppress("Assignment to itself") */
+	ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key; /* @suppress("Assignment to itself") */
 	ptAsicCtrlArea->ulClock_enable = ulValue;
 	__IRQ_UNLOCK__
 	;
@@ -132,6 +130,18 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType,
 	ptDpmArea->ulDpm_tunnel_cfg = HOSTMSK(dpm_tunnel_cfg_wp_cfg_win);
 
 	if (ptDpmConfig != NULL) {
+
+		ptDpmArea->ulDpm_win1_end       = ptDpmConfig->tDpmConfig.ulDpm_win1_end;
+		ptDpmArea->ulDpm_win1_map       = ptDpmConfig->tDpmConfig.ulDpm_win1_map;
+		ptDpmArea->ulDpm_win2_end       = ptDpmConfig->tDpmConfig.ulDpm_win2_end;
+		ptDpmArea->ulDpm_win2_map       = ptDpmConfig->tDpmConfig.ulDpm_win2_map;
+		ptDpmArea->ulDpm_win3_end       = ptDpmConfig->tDpmConfig.ulDpm_win3_end;
+		ptDpmArea->ulDpm_win3_map       = ptDpmConfig->tDpmConfig.ulDpm_win3_map;
+		ptDpmArea->ulDpm_win4_end       = ptDpmConfig->tDpmConfig.ulDpm_win4_end;
+		ptDpmArea->ulDpm_win4_map       = ptDpmConfig->tDpmConfig.ulDpm_win4_map;
+
+
+
 		/*copy imported config*/
 		ptDpmArea->ulDpm_cfg0x0 = ptDpmConfig->tDpmConfig.ulDpmCfg0x0;
 		ptDpmArea->ulDpm_if_cfg = ptDpmConfig->tDpmConfig.ulDpmIfCfg;
@@ -143,16 +153,6 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType,
 		ptDpmArea->aulDpm_pio_cfg[0] = ptDpmConfig->tDpmConfig.ulDpmPioCfg0;
 		ptDpmArea->aulDpm_pio_cfg[1] = ptDpmConfig->tDpmConfig.ulDpmPioCfg1;
 
-		/*
-		 ptDpmArea->ulDpm_win1_end       = ptDpmConfig->ulDpm_win1_end;
-		 ptDpmArea->ulDpm_win1_map       = ptDpmConfig->ulDpm_win1_map;
-		 ptDpmArea->ulDpm_win2_end       = ptDpmConfig->ulDpm_win2_end;
-		 ptDpmArea->ulDpm_win2_map       = ptDpmConfig->ulDpm_win2_map;
-		 ptDpmArea->ulDpm_win3_end       = ptDpmConfig->ulDpm_win3_end;
-		 ptDpmArea->ulDpm_win3_map       = ptDpmConfig->ulDpm_win3_map;
-		 ptDpmArea->ulDpm_win4_end       = ptDpmConfig->ulDpm_win4_end;
-		 ptDpmArea->ulDpm_win4_map       = ptDpmConfig->ulDpm_win4_map;
-		 */
 	} else {
 		/* DPM mapping:
 		 * 0x0000 - 0xffff : intramhs_dpm_mirror
@@ -176,84 +176,77 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType,
 		ptDpmArea->ulDpm_win4_map = 0U;
 
 		/* configure DPM */
-		ptDpmArea->ulDpm_cfg0x0 =
-				g_t_romloader_options.t_hif_options.ucDpmCfg0x0;
+		ptDpmArea->ulDpm_cfg0x0 = g_t_romloader_options.t_hif_options.ucDpmCfg0x0;
 		/* Disable the configuration window. */
-		ptDpmArea->ulDpm_addr_cfg =
-				g_t_romloader_options.t_hif_options.ucDpmAddrCfg
-						| HOSTMSK(dpm_addr_cfg_cfg_win_addr_cfg);
-		ptDpmArea->ulDpm_timing_cfg =
-				g_t_romloader_options.t_hif_options.ucDpmTimingCfg;
-		ptDpmArea->ulDpm_rdy_cfg =
-				g_t_romloader_options.t_hif_options.ucDpmRdyCfg;
-		ptDpmArea->ulDpm_misc_cfg =
-				g_t_romloader_options.t_hif_options.ucDpmMiscCfg;
-		ptDpmArea->ulDpm_io_cfg_misc =
-				g_t_romloader_options.t_hif_options.ucDpmIoCfgMisc;
+		ptDpmArea->ulDpm_addr_cfg =	g_t_romloader_options.t_hif_options.ucDpmAddrCfg| HOSTMSK(dpm_addr_cfg_cfg_win_addr_cfg);
+		ptDpmArea->ulDpm_timing_cfg = g_t_romloader_options.t_hif_options.ucDpmTimingCfg;
+		ptDpmArea->ulDpm_rdy_cfg = g_t_romloader_options.t_hif_options.ucDpmRdyCfg;
+		ptDpmArea->ulDpm_misc_cfg =	g_t_romloader_options.t_hif_options.ucDpmMiscCfg;
+		ptDpmArea->ulDpm_io_cfg_misc =	g_t_romloader_options.t_hif_options.ucDpmIoCfgMisc;
 	}
 
-	/* configure FIQ */
-	ulValue = 0;
-	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg
-			& DPM_IRQFIQ_CFG_Fiq_DPM_Sw) != 0) {
-		ulValue |= HOSTMSK(dpm_irq_fiq_mask_set_dpm_sw);
-	}
-	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg
-			& DPM_IRQFIQ_CFG_Fiq_DPM_Err) != 0) {
-		ulValue |= HOSTMSK(dpm_irq_fiq_mask_set_dpm_err);
-	}
-	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg
-			& DPM_IRQFIQ_CFG_Fiq_Firmware) != 0) {
-		ulValue |= HOSTMSK(dpm_irq_fiq_mask_set_firmware);
-	}
-	ptDpmArea->ulDpm_irq_fiq_mask_set = ulValue;
+//	/* configure FIQ */
+//	ulValue = 0;
+//	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg	& DPM_IRQFIQ_CFG_Fiq_DPM_Sw) != 0) {
+//		ulValue |= HOSTMSK(dpm_irq_fiq_mask_set_dpm_sw);
+//	}
+//	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg	& DPM_IRQFIQ_CFG_Fiq_DPM_Err) != 0) {
+//		ulValue |= HOSTMSK(dpm_irq_fiq_mask_set_dpm_err);
+//	}
+//	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg	& DPM_IRQFIQ_CFG_Fiq_Firmware) != 0) {
+//		ulValue |= HOSTMSK(dpm_irq_fiq_mask_set_firmware);
+//	}
+//	ptDpmArea->ulDpm_irq_fiq_mask_set = ulValue;
+//
+//	/* configure IRQ */
+//	ulValue = 0;
+//	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg	& DPM_IRQFIQ_CFG_Irq_DPM_Sw) != 0) {
+//		ulValue |= HOSTMSK(dpm_irq_irq_mask_set_dpm_sw);
+//	}
+//	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg	& DPM_IRQFIQ_CFG_Irq_DPM_Err) != 0) {
+//		ulValue |= HOSTMSK(dpm_irq_irq_mask_set_dpm_err);
+//	}
+//	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg	& DPM_IRQFIQ_CFG_Irq_Firmware) != 0) {
+//		ulValue |= HOSTMSK(dpm_irq_irq_mask_set_firmware);
+//	}
+//	ptDpmArea->ulDpm_irq_irq_mask_set = ulValue;
 
-	/* configure IRQ */
-	ulValue = 0;
-	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg
-			& DPM_IRQFIQ_CFG_Irq_DPM_Sw) != 0) {
-		ulValue |= HOSTMSK(dpm_irq_irq_mask_set_dpm_sw);
-	}
-	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg
-			& DPM_IRQFIQ_CFG_Irq_DPM_Err) != 0) {
-		ulValue |= HOSTMSK(dpm_irq_irq_mask_set_dpm_err);
-	}
-	if ((g_t_romloader_options.t_hif_options.ucDpmIrqFiqCfg
-			& DPM_IRQFIQ_CFG_Irq_Firmware) != 0) {
-		ulValue |= HOSTMSK(dpm_irq_irq_mask_set_firmware);
-	}
-	ptDpmArea->ulDpm_irq_irq_mask_set = ulValue;
-
-	/* Configure the firmware IRQ. */
-	ptDpmArea->ulDpm_firmware_irq_mask =
-			g_t_romloader_options.t_hif_options.ulFirmwareIrqMask;
+//	/* Configure the firmware IRQ. */
+//	ptDpmArea->ulDpm_firmware_irq_mask = g_t_romloader_options.t_hif_options.ulFirmwareIrqMask;
 
 	/* Configure the HIF pins */
-	ulValue = g_t_romloader_options.t_hif_options.ulHifIoCfg;
-	ulValue |= HOSTMSK(hif_io_cfg_sel_hif_dpm);
-	switch (tDpmTransportType) {
-	case DPM_TRANSPORT_TYPE_Parallel:
-		/* Clear the serial DPM bit. */
-		ulValue &= ~HOSTMSK(hif_io_cfg_sel_dpm_serial);
-		/* Clear the en_hif_rdy_pio_mi bit. Use RDY/BUSY by default. */
-		ulValue &= ~HOSTMSK(hif_io_cfg_en_hif_rdy_pio_mi);
-		break;
+	if (ptDpmConfig != NULL) {
+		__IRQ_LOCK__
+		;
+		ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key; /* @suppress("Assignment to itself") */
+		ptHifIoCtrlArea->ulHif_io_cfg = ptDpmConfig->ulHifIoCfg;
+		__IRQ_UNLOCK__
+		;
+	}else{
+		ulValue = g_t_romloader_options.t_hif_options.ulHifIoCfg;
+		ulValue |= HOSTMSK(hif_io_cfg_sel_hif_dpm);
+		switch (tDpmTransportType) {
+		case DPM_TRANSPORT_TYPE_Parallel:
+			/* Clear the serial DPM bit. */
+			ulValue &= ~HOSTMSK(hif_io_cfg_sel_dpm_serial);
+			/* Clear the en_hif_rdy_pio_mi bit. Use RDY/BUSY by default. */
+			ulValue &= ~HOSTMSK(hif_io_cfg_en_hif_rdy_pio_mi);
+			break;
 
-	case DPM_TRANSPORT_TYPE_Serial:
-		/* Set the serial DPM bit. */
-		ulValue |= HOSTMSK(hif_io_cfg_sel_dpm_serial);
-		break;
+		case DPM_TRANSPORT_TYPE_Serial:
+			/* Set the serial DPM bit. */
+			ulValue |= HOSTMSK(hif_io_cfg_sel_dpm_serial);
+			break;
+		}
+		__IRQ_LOCK__
+		;
+		ptAsicCtrlArea->ulAsic_ctrl_access_key = ptAsicCtrlArea->ulAsic_ctrl_access_key; /* @suppress("Assignment to itself") */
+		ptHifIoCtrlArea->ulHif_io_cfg = ulValue;
+		__IRQ_UNLOCK__
+		;
 	}
-	__IRQ_LOCK__
-	;
-	ptAsicCtrlArea->ulAsic_ctrl_access_key =
-			ptAsicCtrlArea->ulAsic_ctrl_access_key; /* @suppress("Assignment to itself") */
-	ptHifIoCtrlArea->ulHif_io_cfg = ulValue;
-	__IRQ_UNLOCK__
-	;
-
-	/* Set the port control configuration for all HIF and MEM pins. */
-	setup_hif_and_mem_portctrl();
+//	/* Set the port control configuration for all HIF and MEM pins. */
+//	setup_hif_and_mem_portctrl();
 }
 
 static BOOTING_T pcie_init(int idpm) {

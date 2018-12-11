@@ -38,8 +38,7 @@ typedef struct STRUCT_DPM_CONFIGURATION
 	unsigned long ulDpmMiscCfg;
 	unsigned long ulDpmIoCfgMisc;
 
-	/*
-	 in case if needed
+
 	 unsigned long ulDpm_win1_end;
 	 unsigned long ulDpm_win1_map;
 	 unsigned long ulDpm_win2_end;
@@ -50,7 +49,6 @@ typedef struct STRUCT_DPM_CONFIGURATION
 	 unsigned long ulDpm_win4_map;
 
 
-	 * */
 } DPM_CONFIGURATION_T;
 
 typedef struct

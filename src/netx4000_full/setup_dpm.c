@@ -33,7 +33,13 @@
  */
 
 
-
+/**
+ * @brief
+ * @details
+ * @param
+ * @return
+ *
+ */
 static BOOT_MODE_LED_T get_boot_mode(void)
 {
 	HOSTDEF(ptAsicCtrlArea);
@@ -56,6 +62,13 @@ static BOOT_MODE_LED_T get_boot_mode(void)
 	return tBootMode;
 }
 
+/**
+ * @brief
+ * @details
+ * @param
+ * @return
+ *
+ */
 /* Reset all IRQ bits. */
 static void clear_idpm_irqs_(HOSTADEF(IDPM) *ptIdpmArea)
 {
@@ -65,6 +78,14 @@ static void clear_idpm_irqs_(HOSTADEF(IDPM) *ptIdpmArea)
 	ptIdpmArea->ulIdpm_firmware_irq_mask = 0;
 }
 
+
+/**
+ * @brief
+ * @details
+ * @param
+ * @return
+ *
+ */
 static void deinit_idpm_mapping_(HOSTADEF(IDPM) *ptIdpmArea)
 {
 	/* Disable all windows and write protect them. */
@@ -81,6 +102,13 @@ static void deinit_idpm_mapping_(HOSTADEF(IDPM) *ptIdpmArea)
 	ptIdpmArea->ulIdpm_tunnel_cfg = HOSTMSK(idpm_tunnel_cfg_wp_cfg_win);
 }
 
+/**
+ * @brief
+ * @details
+ * @param
+ * @return
+ *
+ */
 static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm)
 {
 	unsigned long ulNetxAdr;
@@ -136,6 +164,14 @@ static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION
 
 }
 
+
+/**
+ * @brief
+ * @details
+ * @param
+ * @return
+ *
+ */
 static void init_intramhs(unsigned int idpm)
 {
 	void *pvDPM;
@@ -151,6 +187,13 @@ static void init_intramhs(unsigned int idpm)
 	memcpy(pvDPM, MESSAGE_IDPM, sizeof(MESSAGE_IDPM));
 }
 
+
+/**
+ * @brief initialize the handshake area
+ * @details
+ * @param ptHandshakeCtrlArea[in]
+ * @return
+ */
 static void init_handshake_area(NX4000_HANDSHAKE_CTRL_AREA_T* ptHandshakeCtrlArea)
 {
 	unsigned int sizCnt;
@@ -180,6 +223,15 @@ static void init_handshake_area(NX4000_HANDSHAKE_CTRL_AREA_T* ptHandshakeCtrlAre
 	} while( sizCnt!=0 );
 }
 
+
+/**
+ * @brief boots an IDPM
+ * @details this function boots an IDPM based on the ptIdpmArea
+ * @param[in/out] ptIdpmArea points to the address space of the IDPM that has to be booted
+ * @param[in] ptIdpmConfig points to the address space that contains the configuration parameter for the IDPM
+ * @param[in] idpm is a variable that simply contains the number of the IDPM that is beeing booted => IDPM0 or IDPM1
+ * @return iResult
+ */
 BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm);
 BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm)
 {
@@ -188,10 +240,15 @@ BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConf
 
 	BOOTING_T iResult = 0;
 
+	///initialize the handshake register
 	init_intramhs(idpm);
 
+	/// deinitialize the idpm mapping
 	deinit_idpm_mapping_(ptIdpmArea);
 
+	/**
+	 * based on the variable idpm either
+	 */
 	switch(idpm){
 	case 0:
 		init_handshake_area(ptHandshakeCtrl0Area);
@@ -209,19 +266,31 @@ BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConf
 }
 
 
-
-
-
-
-
+/**
+ *@brief boots dpm/idpm depending on ptDpmConfigAll
+ *@details boots dpm/idpm depending on the hand-over parameter in the address space
+ *
+ *@param[in] ptDpmConfigAll points to the address space where the hand-over parameter are stored
+ *@return iResult
+ *@see boot_dpm
+ *@see boot_pcie
+ *@see boot_idpm
+ */
 BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll);
 BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 {
 	BOOTING_T iResult = 0;
 	HOSTDEF(ptIdpm0Area);
 	HOSTDEF(ptIdpm1Area);
+	HOSTDEF(ptHifIoCtrlArea);
+	HOSTDEF(ptAsicCtrlArea);
 
-	/*check ulDPMEnable for boot options of DPM*/
+	/**	check ptDpmConfigAll->ulDPMEnable for boot options of DPM
+	 * 	depending on the value of ptDpmConfigAll->ulDPMEnable, boot_dpm() is called with the following parameter:
+	 * 		0 => DO NOTHING
+	 *		1 => DPM_TRANSPORT_TYPE_Parallel => 0 => parallel DPM is booted
+	 *  	2 => DPM_TRANSPORT_TYPE_Serial => 1 => parallel DPM is booted
+	 */
 	switch(ptDpmConfigAll->ulDPMEnable)
 	{
 	default:
@@ -238,7 +307,12 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 
 
 
-	/*check ulIDPM0Enable for boot options of IDPM0*/
+
+	/** check ptDpmConfigAll->ulIDPM0Enable for boot options of IDPM0
+	 *  	0 => Do NOTHING
+	 *  	1 => boot PCIe on IDPM0
+	 *  	2 => boot IDPM
+	 */
 	switch(ptDpmConfigAll->ulIDPM0Enable)
 	{
 	default:
@@ -246,6 +320,7 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		/*DO NOTHING*/
 		break;
 	case 1:
+
 		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		/*boot idpm0 as pcie*/
 		iResult = boot_pcie(IDPM0);
@@ -258,7 +333,11 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		break;
 	}
 
-	/*check ulIDPM0Enable for boot options of IDPM0*/
+	/** check ptDpmConfigAll->ulIDPM1Enable for boot options of IDPM1
+	 *  	0 => Do NOTHING
+	 *  	1 => not implemented
+	 *  	2 => boot IDPM
+	 */
 	switch(ptDpmConfigAll->ulIDPM1Enable)
 	{
 	default:
@@ -266,9 +345,6 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		/*DO NOTHING*/
 		break;
 	case 1:
-//		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
-//		/*boot idpm1 as pcie*/
-//		iResult = boot_pcie(IDPM1);
 		break;
 	case 2:
 		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
@@ -281,7 +357,19 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 }
 
 
-
+/**
+ *@brief boot dpm based on ptDpmConfig
+ *@details this function is a "quick" option for booting the dpm.
+ *@details to boot the following options, ptDpmConfig has to have the following value:
+ *@details	0 => default behavior => get boot option from external pins
+ *@details 	1 => BootModeLed_netX_HIF_DPM_serial
+ *@details 	4 => BootModeLed_netX_HIF_DPM_parallel
+ *@details 	7 => BootModeLed_REE_DPM_PCIE
+ *@details 	the numbers are translated from the hand over parameter (boot parameter) to the firmware
+ *
+ *@param[in] ptDpmConfig in this function the pointer is used as a hand over parameter itself, it contains the option for the boot mode
+ *@return iResult
+ */
 int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig);
 int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig)
 {
@@ -295,13 +383,6 @@ int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig)
 	/* Detect if this is really a FULL chip. */
 	if( tRomVector.ulInfo==ROMVECTOR_INFO_netX4000_FULL )
 	{
-
-    /* check first parameter (pointer) for following options */
-	/* 0 => default behaviour => get boot option from external pins  */
-	/* the numbers are translated from the hand over parameter (boot parameter) to the firmware */
-    /* 1 =>	BootModeLed_netX_HIF_DPM_serial    => 1                  */
-	/* 7 => BootModeLed_REE_DPM_PCIE           => 4                  */
-	/* 4 => BootModeLed_netX_HIF_DPM_parallel  => 5                  */
 	
         if (ptDpmConfig == (HIF_CONFIG_T*)1)
 		{
@@ -325,8 +406,6 @@ int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig)
 		HOSTDEF(ptIdpm0Area);
 		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 
-//		HOSTDEF(ptIdpm1Area);
-//		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		
 		switch(tBootMode)
 		{
@@ -379,6 +458,21 @@ int setup_boot_mode_dpm(HIF_CONFIG_T* ptDpmConfig)
 	return iResult;
 }
 
+
+/**
+ * @brief start function for dpm setup
+ * @details this function either calls setup_boot_mode_dpm() or setup_dpm_all() depending on the value of ptDpmConfig.
+ * @details		if ptDpmConfig is greater then '0x04000000' we assume it is actually a pointer to an address space and we call setup_dpm_all()
+ * @details			->in this case the board-config-.xml file has to contain the correct hand-over parameter
+ * @details		else setup_boot_mode_dpm() is called
+ * @details
+ * @details		if the called function returns with a result that is not '0' we go directly into an endless loop.
+ *
+ * @param[in] ptDpmConfig pointer to the location of the hand-over parameter
+ * @see setup_boot_mode_dpm
+ * @see setup_dpm_all
+ *
+ */
 void __attribute__ ((section (".init_code"))) start(HIF_CONFIG_T* ptDpmConfig);
 void start(HIF_CONFIG_T* ptDpmConfig)
 {
