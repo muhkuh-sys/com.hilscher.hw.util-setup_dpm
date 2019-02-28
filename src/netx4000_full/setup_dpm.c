@@ -5,20 +5,24 @@
 
 #if ASIC_TYP==ASIC_TYP_NETX4000_FULL
 #include "netx4000_full/boot_dpm.h"
+#define PACKAGE_SELECTION_4000 0
+#define PACKAGE_SELECTION_4100 1
 
 #elif ASIC_TYP==ASIC_TYP_NETX4000_RELAXED
 #include "netx4000_relaxed/boot_dpm.h"
-
 #endif
 
 
-//#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
-//#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
-//#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
-#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
-#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
-#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
-#define MESSAGE_IDPM     	 "netX4000 RELAXED IDPM"
+#define MESSAGE_DPM_SERIAL   "serial DPM"
+#define MESSAGE_DPM_PARALLEL "parallel DPM"
+#define MESSAGE_DPM_PCIE     "PCI express DPM"
+#define MESSAGE_IDPM     	 "IDPM"
+
+
+//#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
+//#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
+//#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
+//#define MESSAGE_IDPM     	 "netX4000 RELAXED IDPM"
 
 #include "netx_io_areas.h"
 #include "rdy_run.h"
@@ -31,7 +35,26 @@
  * They define the position of the boot mode pins in the
  * ASR_ID registers.
  */
-
+/**
+ * @brief
+ * @details
+ * @param
+ * @return
+ *
+ */
+char* get_package_selection(char* dpmCfg);
+char* get_package_selection(char* dpmCfg)
+{
+	unsigned long *ptOTPcfg = (unsigned long*) HOSTADR(RAP_SYSCTRL_OTP_CONFIG_0);
+	int package_selection = *ptOTPcfg & 1;
+	char ucChipType[20] = "";
+	if(package_selection == PACKAGE_SELECTION_4000)
+		strcat(ucChipType,"netx4000 ");
+	else
+		strcat(ucChipType,"netx4100 ");
+	strcat(ucChipType,dpmCfg);
+	return ucChipType;
+}
 
 /**
  * @brief
@@ -109,6 +132,7 @@ static void deinit_idpm_mapping_(HOSTADEF(IDPM) *ptIdpmArea)
  * @return
  *
  */
+
 static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION_T* ptIdpmConfig, unsigned int idpm)
 {
 	unsigned long ulNetxAdr;
@@ -184,7 +208,9 @@ static void init_intramhs(unsigned int idpm)
 	break;
 	}
 	memset(pvDPM, 0, 32768);
-	memcpy(pvDPM, MESSAGE_IDPM, sizeof(MESSAGE_IDPM));
+	char message[100];
+	strcpy(message, get_package_selection(MESSAGE_IDPM));
+	memcpy(pvDPM, message, sizeof(message));
 }
 
 

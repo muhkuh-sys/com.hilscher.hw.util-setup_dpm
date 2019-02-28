@@ -13,13 +13,11 @@
 #include "setup_dpm.h"
 #include "options.h"
 
-#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
-#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
-#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
-#define MESSAGE_IDPM     	 "netX4000 RELAXED IDPM"
-//#define MESSAGE_DPM_SERIAL   "netX4000 serial DPM"
-//#define MESSAGE_DPM_PARALLEL "netX4000 parallel DPM"
-//#define MESSAGE_DPM_PCIE     "netX4000 PCI express DPM"
+
+#define MESSAGE_DPM_SERIAL   "serial DPM"
+#define MESSAGE_DPM_PARALLEL "parallel DPM"
+#define MESSAGE_DPM_PCIE     "PCI express DPM"
+#define MESSAGE_IDPM     	 "IDPM"
 
 /*---------------------------------------------------------------------------*/
 
@@ -116,13 +114,17 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType, HIF_CONFIG_T* ptDpm
 	/* Leave a message in the DPM. */
 	pvDPM = (void*) HOSTADDR(intramhs_straight_mirror);
 	memset(pvDPM, 0, 65536);
+	char message[100];
 	switch (tDpmTransportType) {
 	case DPM_TRANSPORT_TYPE_Parallel:
-		memcpy(pvDPM, MESSAGE_DPM_PARALLEL, sizeof(MESSAGE_DPM_PARALLEL));
+		strcpy(message, get_package_selection(MESSAGE_DPM_PARALLEL));
+		//message = get_package_selection(MESSAGE_DPM_PARALLEL);
+		memcpy(pvDPM, message, sizeof(message));
 		break;
 
 	case DPM_TRANSPORT_TYPE_Serial:
-		memcpy(pvDPM, MESSAGE_DPM_SERIAL, sizeof(MESSAGE_DPM_SERIAL));
+		strcpy(message, get_package_selection(MESSAGE_DPM_SERIAL));
+		memcpy(pvDPM, message, sizeof(message));
 		break;
 	}
 
@@ -434,6 +436,8 @@ static BOOTING_T pcie_init(int idpm) {
 	return tResult;
 }
 
+
+
 /*-------------------------------------------------------------------------*/
 
 BOOTING_T boot_dpm(DPM_TRANSPORT_TYPE_T tDpmTransportType,
@@ -478,7 +482,9 @@ BOOTING_T boot_pcie(int idpm) {
 	}
 
 	memset(pvDPM, 0, 65536);
-	memcpy(pvDPM, MESSAGE_DPM_PCIE, sizeof(MESSAGE_DPM_PCIE));
+	char message[100];
+	strcpy(message, get_package_selection(MESSAGE_DPM_PCIE));
+	memcpy(pvDPM, message, sizeof(message));
 
 	/* Setup the PCIE core. */
 	tResult = pcie_init(idpm);

@@ -74,7 +74,7 @@ tBin_netx4000_full = tEnv_netx4000_full.ObjCopy('targets/netx4000_full/setup_dpm
 tTmp_netx4000_full = tEnv_netx4000_full.GccSymbolTemplate('targets/netx4000_full/snippet.xml', tElf_netx4000_full, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_full[0])
 
 # Create the snippet from the parameters.
-aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
+aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util', 'netx4000']
 atSnippet_netx4000_full = {
     'group': '.'.join(aArtifactGroupReverse),
     'artifact': 'setup_dpm_netx4000_full',
@@ -120,7 +120,7 @@ tBin_netx4000_relaxed = tEnv_netx4000_relaxed.ObjCopy('targets/netx4000_relaxed/
 tTmp_netx4000_relaxed = tEnv_netx4000_relaxed.GccSymbolTemplate('targets/netx4000_relaxed/snippet.xml', tElf_netx4000_relaxed, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet_4000.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx4000_relaxed[0])
 
 # Create the snippet from the parameters.
-aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
+aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util', 'netx4000']
 atSnippet_netx4000_relaxed = {
     'group': '.'.join(aArtifactGroupReverse),
     'artifact': 'setup_dpm_netx4000_relaxed',
@@ -162,7 +162,7 @@ tBin_netx90_mpw = tEnv_netx90_mpw.ObjCopy('targets/netx90_mpw/setup_dpm_netx90_m
 tTmp_netx90_mpw = tEnv_netx90_mpw.GccSymbolTemplate('targets/netx90_mpw/snippet.xml', tElf_netx90_mpw, GCCSYMBOLTEMPLATE_TEMPLATE='targets/hboot_snippet.xml', GCCSYMBOLTEMPLATE_BINFILE=tBin_netx90_mpw[0])
 
 # Create the snippet from the parameters.
-aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util']
+aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util', 'netx90']
 atSnippet_netx90_mpw = {
     'group': '.'.join(aArtifactGroupReverse),
     'artifact': 'setup_dpm_netx90_MPW',
