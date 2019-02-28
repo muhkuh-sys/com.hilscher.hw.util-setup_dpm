@@ -195,26 +195,19 @@ IF STATE.RUN()
   DIALOG.OK "Failed to stop at end of HWC"
   ENDDO
 )
-data.LOAD.binary ref_netx4000.bin 0x05200000++0x012 /DIFF
+
+data.LOAD.binary ref_netx4100.bin 0x05200000++0x012 /DIFF	
 IF !FOUND()
 (
-	DIALOG.OK "Found Message for netx4000 SPM-Setup! TEST OK"
+	DIALOG.OK "Found Message for netx4100 SPM-Setup! TEST OK"
 	ENDDO
 )
 ELSE
 (
-	data.LOAD.binary ref_netx4100.bin 0x05200000++0x012 /DIFF	
-	IF !FOUND()
-	(
-		DIALOG.OK "Found Message for netx4100 SPM-Setup! TEST OK"
-		ENDDO
-	)
-	ELSE
-	(
-		DIALOG.OK "TEST FAILED! no correct message for SPM-Setup found"
-		ENDDO
-	)
+	DIALOG.OK "TEST FAILED! no correct message found for netx4100 SPM-Setup"
+	ENDDO
 )
+
 
 
 ENDDO

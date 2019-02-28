@@ -1,18 +1,24 @@
 ﻿Testablauf:		
 	-Testboard flashen mit:
-			-'common/netx4000_startup_SPM.nxi'
-			-'common/fdl_cifx4000.fdl'
-		netx4000:
-			-'netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.hwc'
-			-'netx4000/MWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.mwc'
-		netx4100:
-			-'netx4100/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.hwc'
-			-'netx4100/MWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.mwc'
-		
+		-'common/netx4000_startup_SPM.nxi'
+		-'common/fdl_cifx4000.fdl'
+	netx4000:
+		-'netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.hwc'
+		-'netx4000/MWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.mwc'
+			
+	-Testboard mit Lauterbach verbinden
+		-'netx4000/Lauterbach_netx4000_SPM_test.do' ausführen (funktioniert nur wenn es sich noch im aktuellen Verzeichnis befindet)
+		->Ausführen im Lauterbach: (File->Run Script: {Pfad zum Script auswählen})		
+			
+	netx4100:
+		-'netx4100/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.hwc'
+		-'netx4100/MWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_0.0.2.0.mwc'
 		
 	-Testboard mit Lauterbach verbinden
-	-'common/Lauterbach_SPM_test.do' ausführen (funktioniert nur wenn es sich noch im aktuellen Verzeichnis befindet)
-		->Ausführen im Lauterbach: (File->Run Script: {Pfad zum Script auswählen})
+		-'netx4100/Lauterbach_netx4100_SPM_test.do' ausführen (funktioniert nur wenn es sich noch im aktuellen Verzeichnis befindet)
+		->Ausführen im Lauterbach: (File->Run Script: {Pfad zum Script auswählen})		
+		
+
 
 Testerwartung:
 	netx4000:
