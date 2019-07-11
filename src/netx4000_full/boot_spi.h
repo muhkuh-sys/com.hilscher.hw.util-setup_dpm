@@ -133,8 +133,8 @@ typedef struct STRUCT_SPI_CFG
 } SPI_CFG_T;
 
 
-void boot_spi_activate_mmio(const SPI_CFG_T *ptCfg, const MMIO_CFG_T *ptMmioValues);
-void boot_spi_deactivate_mmio(const SPI_CFG_T *ptCfg, const MMIO_CFG_T *ptMmioValues);
+void boot_spi_activate_mmio(const SPI_CFG_T *ptCfg, const NX4000_MMIO_CFG_T *ptMmioValues);
+void boot_spi_deactivate_mmio(const SPI_CFG_T *ptCfg, const NX4000_MMIO_CFG_T *ptMmioValues);
 
 PFN_SPI_INIT boot_spi_offset_to_unit(unsigned int uiSpiUnitOffset, unsigned int *puiSpiUnit, unsigned int *puiChipSelect);
 

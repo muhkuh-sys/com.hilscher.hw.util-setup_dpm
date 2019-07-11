@@ -30,7 +30,7 @@ Import('atEnv')
 # Create a build environment for the Cortex-R7 and Cortex-A9 based netX chips.
 env_cortexR7 = atEnv.DEFAULT.CreateEnvironment(['gcc-arm-none-eabi-4.9', 'asciidoc'])
 env_cortexR7.CreateCompilerEnv('NETX4000_RELAXED', ['arch=armv7', 'thumb'], ['arch=armv7-r', 'thumb'])
-env_cortexR7.CreateCompilerEnv('NETX4000_FULL', ['arch=armv7', 'thumb'], ['arch=armv7-r', 'thumb'])
+env_cortexR7.CreateCompilerEnv('NETX4000', ['arch=armv7', 'thumb'], ['arch=armv7-r', 'thumb'])
 
 # Create a build environment for the Cortex-M4 based netX chips.
 env_cortexM4 = atEnv.DEFAULT.CreateEnvironment(['gcc-arm-none-eabi-4.9', 'asciidoc'])
@@ -63,7 +63,7 @@ sources_netx4000_full = """
 	src/netx4000_full/setup_dpm.c
 """
 
-tEnv_netx4000_full = atEnv.NETX4000_FULL.Clone()
+tEnv_netx4000_full = atEnv.NETX4000.Clone()
 tEnv_netx4000_full.Append(CPPPATH = ['src', 'src/netx4000_full', '#platform/src', '#platform/src/lib', '#targets/version'])
 tEnv_netx4000_full.Append(CPPDEFINES = [['ASIC_ENV_ASIC', '0'], ['ASIC_ENV_SCIT_BOARD', '1'], ['ASIC_ENV_SIMU', '2'], ['ASIC_ENV', '0'], ['CFG_ARTIFICIAL_KEYROM', '0'], ['CFG_ARTIFICIAL_OTP_FUSES', '0']])
 tEnv_netx4000_full.Replace(LDFILE = 'src/netx4000_full/netx4000_full_cr7.ld')

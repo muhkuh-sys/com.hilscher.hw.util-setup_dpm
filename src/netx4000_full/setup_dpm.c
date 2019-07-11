@@ -3,7 +3,7 @@
 
 #include "boot_common.h"
 
-#if ASIC_TYP==ASIC_TYP_NETX4000_FULL
+#if ASIC_TYP==ASIC_TYP_NETX4000
 #include "netx4000_full/boot_dpm.h"
 #define PACKAGE_SELECTION_4000 0
 #define PACKAGE_SELECTION_4100 1

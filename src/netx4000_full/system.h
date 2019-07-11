@@ -20,7 +20,7 @@
 #       error "System not configured! Asic typ missing"
 #endif
 
-#if ASIC_TYP!=ASIC_TYP_NETX4000_FULL
+#if ASIC_TYP!=ASIC_TYP_NETX4000
 #       error "Invalid Asic typ, must be 4000!"
 #endif
 

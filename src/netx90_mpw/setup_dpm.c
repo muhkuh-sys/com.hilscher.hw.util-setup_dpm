@@ -85,17 +85,17 @@ typedef struct
 static const DEFAULT_HIF_CONFIG_T t_hif_options_default =
 {
 	/* Set the serial DPM mode to 3. */
-	.ulHifIoCfg        = DFLT_VAL_NX90_hif_io_cfg | HOSTMSK(hif_io_cfg_sel_dpm_serial_spo) | HOSTMSK(hif_io_cfg_sel_dpm_serial_sph),
+	.ulHifIoCfg        = HOSTDFLT(hif_io_cfg) | HOSTMSK(hif_io_cfg_sel_dpm_serial_spo) | HOSTMSK(hif_io_cfg_sel_dpm_serial_sph),
 	.tDpmConfig       = {
-		.ulDpmCfg0x0       = DFLT_VAL_NX90_dpm_cfg0x0,
-		.ulDpmIfCfg        = DFLT_VAL_NX90_dpm_if_cfg,
-		.ulDpmPioCfg0      = DFLT_VAL_NX90_dpm_pio_cfg0,
+		.ulDpmCfg0x0       = HOSTDFLT(dpm_cfg0x0),
+		.ulDpmIfCfg        = HOSTDFLT(dpm_if_cfg),
+		.ulDpmPioCfg0      = HOSTDFLT(dpm_pio_cfg0),
 		.ulDpmPioCfg1      = 0,
 		.ulDpmAddrCfg      = 7U << HOSTSRT(dpm_addr_cfg_addr_range),
-		.ulDpmTimingCfg    = DFLT_VAL_NX90_dpm_timing_cfg,
+		.ulDpmTimingCfg    = HOSTDFLT(dpm_timing_cfg),
 		.ulDpmRdyCfg       = HOSTMSK(dpm_rdy_cfg_rdy_pol) | (1U << HOSTSRT(dpm_rdy_cfg_rdy_drv_mode)),
-		.ulDpmMiscCfg      = DFLT_VAL_NX90_dpm_misc_cfg,
-		.ulDpmIoCfgMisc    = DFLT_VAL_NX90_dpm_io_cfg_misc
+		.ulDpmMiscCfg      = HOSTDFLT(dpm_misc_cfg),
+		.ulDpmIoCfgMisc    = HOSTDFLT(dpm_io_cfg_misc)
 	}
 };
 
@@ -282,31 +282,31 @@ static void init_intramhs(void)
 
 static void init_handshake_area(void)
 {
-	HOSTDEF(ptHandshakeComArea);
+	HOSTDEF(ptHandshakeCtrlComArea);
 	unsigned int sizCnt;
 
 	/* Read all handshake registers and disable them. */
-	sizCnt = sizeof(ptHandshakeComArea->aulHandshake_hsc_ctrl)/sizeof(unsigned long);
+	sizCnt = sizeof(ptHandshakeCtrlComArea->aulHandshake_hsc_ctrl)/sizeof(unsigned long);
 	do
 	{
-		ptHandshakeComArea->aulHandshake_hsc_ctrl[--sizCnt] = 0;
+		ptHandshakeCtrlComArea->aulHandshake_hsc_ctrl[--sizCnt] = 0;
 	} while( sizCnt!=0 );
 
 	/* Disable all handshake IRQs. */
-	ptHandshakeComArea->ulHandshake_dpm_irq_raw_clear = 0xffffffff;
-	ptHandshakeComArea->ulHandshake_dpm_irq_msk_reset = 0xffffffff;
-	ptHandshakeComArea->ulHandshake_arm_irq_raw_clear = 0xffffffff;
-	ptHandshakeComArea->ulHandshake_arm_irq_msk_reset = 0xffffffff;
-	ptHandshakeComArea->ulHandshake_xpic_irq_raw_clear = 0xffffffff;
-	ptHandshakeComArea->ulHandshake_xpic_irq_msk_reset = 0xffffffff;
+	ptHandshakeCtrlComArea->ulHandshake_dpm_irq_raw_clear = 0xffffffff;
+	ptHandshakeCtrlComArea->ulHandshake_dpm_irq_msk_reset = 0xffffffff;
+	ptHandshakeCtrlComArea->ulHandshake_arm_irq_raw_clear = 0xffffffff;
+	ptHandshakeCtrlComArea->ulHandshake_arm_irq_msk_reset = 0xffffffff;
+	ptHandshakeCtrlComArea->ulHandshake_xpic_irq_raw_clear = 0xffffffff;
+	ptHandshakeCtrlComArea->ulHandshake_xpic_irq_msk_reset = 0xffffffff;
 
-	sizCnt = sizeof(ptHandshakeComArea->asHandshake_buf_man)/sizeof(ptHandshakeComArea->asHandshake_buf_man[0]);
+	sizCnt = sizeof(ptHandshakeCtrlComArea->asHandshake_buf_man)/sizeof(ptHandshakeCtrlComArea->asHandshake_buf_man[0]);
 	do
 	{
 		--sizCnt;
-		ptHandshakeComArea->asHandshake_buf_man[sizCnt].ulCtrl = HOSTDFLT(handshake_buf_man0_ctrl);
-		ptHandshakeComArea->asHandshake_buf_man[sizCnt].ulStatus_ctrl_netx = HOSTDFLT(handshake_buf_man0_status_ctrl_netx);
-		ptHandshakeComArea->asHandshake_buf_man[sizCnt].ulWin_map = 0;
+		ptHandshakeCtrlComArea->asHandshake_buf_man[sizCnt].ulCtrl = HOSTDFLT(handshake_buf_man0_ctrl);
+		ptHandshakeCtrlComArea->asHandshake_buf_man[sizCnt].ulStatus_ctrl_netx = HOSTDFLT(handshake_buf_man0_status_ctrl_netx);
+		ptHandshakeCtrlComArea->asHandshake_buf_man[sizCnt].ulWin_map = 0;
 	} while( sizCnt!=0 );
 }
 
