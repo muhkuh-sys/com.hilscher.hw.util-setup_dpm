@@ -88,4 +88,5 @@ typedef struct
 	DPM_CONFIGURATION_T tDpmConfig;
 } DEFAULT_HIF_CONFIG_T;
 
+void set_dpm_message(char* pcDest, const char* pcDpmType);
 #endif

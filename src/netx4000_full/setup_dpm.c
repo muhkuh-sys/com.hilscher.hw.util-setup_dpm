@@ -13,9 +13,9 @@
 #endif
 
 
-#define MESSAGE_DPM_SERIAL   "serial DPM"
-#define MESSAGE_DPM_PARALLEL "parallel DPM"
-#define MESSAGE_DPM_PCIE     "PCI express DPM"
+//#define MESSAGE_DPM_SERIAL   "serial DPM"
+//#define MESSAGE_DPM_PARALLEL "parallel DPM"
+//#define MESSAGE_DPM_PCIE     "PCI express DPM"
 #define MESSAGE_IDPM     	 "IDPM"
 
 
@@ -36,24 +36,22 @@
  * ASR_ID registers.
  */
 /**
- * @brief
- * @details
- * @param
- * @return
+ * @brief Construct a DPM message.
+ * @details Create a message combining the package type and the DPM type.
+ * @param pcDest The destination where the message is created
+ * @param pcDpmType DPM type string
  *
  */
-char* get_package_selection(char* dpmCfg);
-char* get_package_selection(char* dpmCfg)
+void set_dpm_message(char* pcDest, const char* pcDpmType)
 {
-	unsigned long *ptOTPcfg = (unsigned long*) HOSTADR(RAP_SYSCTRL_OTP_CONFIG_0);
-	int package_selection = *ptOTPcfg & 1;
-	char ucChipType[20] = "";
-	if(package_selection == PACKAGE_SELECTION_4000)
-		strcat(ucChipType,"netx4000 ");
+	HOSTDEF(ptRAPSysctrlArea);
+	unsigned long ulPackageSelection = ptRAPSysctrlArea->aulRAP_SYSCTRL_OTP_CONFIG_[0] & 1;
+	
+	if(ulPackageSelection == PACKAGE_SELECTION_4000)
+		strcpy(pcDest, "netx4000 ");
 	else
-		strcat(ucChipType,"netx4100 ");
-	strcat(ucChipType,dpmCfg);
-	return ucChipType;
+		strcpy(pcDest, "netx4100 ");
+	strcat(pcDest, pcDpmType);
 }
 
 /**
@@ -202,15 +200,16 @@ static void init_intramhs(unsigned int idpm)
 	switch(idpm){
 	case 0:
 		pvDPM = (void*)HOSTADDR(intramhs0_straight_mirror);
+		memset(pvDPM, 0, 32768);
+		set_dpm_message((char*) pvDPM, MESSAGE_IDPM);
 		break;
+		
 	case 1:
 		pvDPM = (void*)HOSTADDR(intramhs1_straight_mirror);
-	break;
+		memset(pvDPM, 0, 32768);
+		set_dpm_message((char*) pvDPM, MESSAGE_IDPM);
+		break;
 	}
-	memset(pvDPM, 0, 32768);
-	char message[100];
-	strcpy(message, get_package_selection(MESSAGE_IDPM));
-	memcpy(pvDPM, message, sizeof(message));
 }
 
 
@@ -308,8 +307,8 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 	BOOTING_T iResult = 0;
 	HOSTDEF(ptIdpm0Area);
 	HOSTDEF(ptIdpm1Area);
-	HOSTDEF(ptHifIoCtrlArea);
-	HOSTDEF(ptAsicCtrlArea);
+	//HOSTDEF(ptHifIoCtrlArea);
+	//HOSTDEF(ptAsicCtrlArea);
 
 	/**	check ptDpmConfigAll->ulDPMEnable for boot options of DPM
 	 * 	depending on the value of ptDpmConfigAll->ulDPMEnable, boot_dpm() is called with the following parameter:

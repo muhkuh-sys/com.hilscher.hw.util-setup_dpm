@@ -114,17 +114,13 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType, HIF_CONFIG_T* ptDpm
 	/* Leave a message in the DPM. */
 	pvDPM = (void*) HOSTADDR(intramhs_straight_mirror);
 	memset(pvDPM, 0, 65536);
-	char message[100];
 	switch (tDpmTransportType) {
 	case DPM_TRANSPORT_TYPE_Parallel:
-		strcpy(message, get_package_selection(MESSAGE_DPM_PARALLEL));
-		//message = get_package_selection(MESSAGE_DPM_PARALLEL);
-		memcpy(pvDPM, message, sizeof(message));
+		set_dpm_message((char*) pvDPM, MESSAGE_DPM_PARALLEL);
 		break;
 
 	case DPM_TRANSPORT_TYPE_Serial:
-		strcpy(message, get_package_selection(MESSAGE_DPM_SERIAL));
-		memcpy(pvDPM, message, sizeof(message));
+		set_dpm_message((char*) pvDPM, MESSAGE_DPM_SERIAL);
 		break;
 	}
 
@@ -475,31 +471,28 @@ BOOTING_T boot_pcie(int idpm) {
 	switch (idpm) {
 	case 0:
 		pvDPM = (void*) HOSTADDR(intramhs0_straight_mirror);
+		memset(pvDPM, 0, 65536);
+		set_dpm_message((char*) pvDPM, MESSAGE_DPM_PCIE);
+		tResult = pcie_init(idpm);
+		if (tResult == BOOTING_Ok) {
+			ptIdpm0Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
+		}
 		break;
+		
 	case 1:
 		pvDPM = (void*) HOSTADDR(intramhs1_straight_mirror);
-		break;
-	}
-
-	memset(pvDPM, 0, 65536);
-	char message[100];
-	strcpy(message, get_package_selection(MESSAGE_DPM_PCIE));
-	memcpy(pvDPM, message, sizeof(message));
-
-	/* Setup the PCIE core. */
-	tResult = pcie_init(idpm);
-	if (tResult == BOOTING_Ok) {
-		switch (idpm) {
-		case 0:
-			ptIdpm0Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
-			break;
-		case 1:
+		memset(pvDPM, 0, 65536);
+		set_dpm_message((char*) pvDPM, MESSAGE_DPM_PCIE);
+		tResult = pcie_init(idpm);
+		if (tResult == BOOTING_Ok) {
 			ptIdpm1Area->ulIdpm_irq_pci_inta_mask_set = HOSTMSK(idpm_irq_pci_inta_mask_set_firmware);
-			break;
-		default:
-			break;
 		}
+		break;
+		
+	default:
+		tResult = BOOTING_Setup_Error;
 	}
+	
 	return tResult;
 }
 
