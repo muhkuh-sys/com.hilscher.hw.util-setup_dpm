@@ -7,5 +7,4 @@ ${%PROGRAM_DATA%}
 </Data>
 <Execute>
 	<Address>${%EXECUTION_ADDRESS%}</Address>
-	<R0>%%CONFIGURATION_ADDRESS%%</R0>
 </Execute>

@@ -51,6 +51,7 @@ atEnv.DEFAULT.Version('#targets/version/version.h', 'templates/version.h')
 atEnv.DEFAULT.Version('#targets/hboot_snippet.xml', 'templates/hboot_snippet.xml')
 atEnv.DEFAULT.Version('#targets/hboot_snippet_4000.xml', 'templates/hboot_snippet_4000.xml')
 
+
 #----------------------------------------------------------------------------
 #
 # Build the netx4000 FULL snippet.
@@ -183,3 +184,13 @@ snippet_netx90_mpw = tEnv_netx90_mpw.HBootSnippet('%s/%s-%s.xml' % (strArtifactP
 
 # Create the POM file.
 tPOM_netx90_mpw = tEnv_netx90_mpw.POMTemplate('%s/%s-%s.pom' % (strArtifactPath_netx90_mpw, atSnippet_netx90_mpw['artifact'], PROJECT_VERSION), 'templates/pom.xml', POM_TEMPLATE_GROUP=atSnippet_netx90_mpw['group'], POM_TEMPLATE_ARTIFACT=atSnippet_netx90_mpw['artifact'], POM_TEMPLATE_VERSION=atSnippet_netx90_mpw['version'], POM_TEMPLATE_PACKAGING='xml')
+
+
+
+#----------------------------------------------------------------------------
+#
+# Build test cases for netX 4000
+#
+
+# Create binaries for verification 
+tst1_netx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/SPM_test/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4000/board_config_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml', 'tElfapply_asic_ctrl_netx4000': 'verification/SPM_test/common/apply_asic_ctrl_netx4000.elf'}), HBOOTIMAGE_VERBOSE=False)

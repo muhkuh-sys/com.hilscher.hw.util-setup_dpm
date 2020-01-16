@@ -177,16 +177,51 @@ Break
 
 d.dump 0x05200000
 
-Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
+// use only for debugging if stopped inside snippet setup_dpm
+// Break.Set 0x4000008 /Onchip /PROGRAM /COUNT ?3?
+// Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
 
 Mode
 
-Break.Set 0x4000008 /Onchip /PROGRAM /COUNT 3
+Break.Set 0x4000008 /Onchip /PROGRAM /COUNT 2
 
-Go
+Break.Set 0x041120bc /Onchip /PROGRAM
 
+// invalid INTRAM
+d.Set 0x05100000++0xff %Long 0x1234ffff
+
+// invalid DPM window message
+d.Set 0x05200000++0xff %Long 0x8987affe
+
+// set PC into endless loop
+d.set 0x05100000++3 %Long 0xEAFFFFFE
+
+R.S PC R:0x05100000
+R.S CPSR 0x800001D8
+
+// reset is only allowed, if CPU is running
+go
+
+// reset netX4000
 SYStem.RESetOut
 
+WAIT (!STATE.RUN()) 1s
+
+IF STATE.RUN()
+(
+  DIALOG.OK "Failed to stop before start of setup_dpm"
+  ENDDO
+)
+// first breakpoint is expected just before start of setup_dpm program
+data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /DIFF
+IF FOUND()
+(
+	DIALOG.OK "Error setup_dpm code NOT found"
+	ENDDO
+)
+
+// 
+go
 WAIT (!STATE.RUN()) 1s
 
 

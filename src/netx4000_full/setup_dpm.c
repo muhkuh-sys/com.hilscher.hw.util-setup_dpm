@@ -47,6 +47,13 @@ void set_dpm_message(char* pcDest, const char* pcDpmType)
 	HOSTDEF(ptRAPSysctrlArea);
 	unsigned long ulPackageSelection = ptRAPSysctrlArea->aulRAP_SYSCTRL_OTP_CONFIG_[0] & 1;
 	
+	
+	/*not allowed message inside DPM is
+	  -- netX with upper case X,
+		-- BOOT,
+		-- INIT,
+		because this is used by FW for detection. */
+	
 	if(ulPackageSelection == PACKAGE_SELECTION_4000)
 		strcpy(pcDest, "netx4000 ");
 	else

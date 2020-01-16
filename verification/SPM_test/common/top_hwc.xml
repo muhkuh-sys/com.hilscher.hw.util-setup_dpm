@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <!-- no end because the end is inside the following FW image. -->
+    <!-- Hardware configuration data located inside first 124kByte of external flash  -->
 <HBootImage type="REGULAR" device="SQIROM0" has_header="True" has_end="False" >
+  <Header set_flasher_parameters="true" />
   <Chunks>
+    <!-- reserved 4kByte space for root certificate -->
+    <!-- skip over optional hboot header  64bytes -->
+    <Skip absolute="0x1040" fill="0x52" />
+  
+    <!-- reserved 4kByte space for license certificate -->
+    <!-- skip over optional hboot header  64bytes -->
+    <Skip absolute="0x2040" fill="0x4C" />
+  
+    <!-- Hardware configuration data located after first 8kByte of internal flash  -->
+    <Include name="@tBoardconfig">
+        <Parameter name="HWC_TYPE_HEX">485743</Parameter> <!-- HWC -->
+        <Parameter name="HWC_TYPE">HWC</Parameter>
+        <Parameter name="HWC_INFO_ADDRESS">0x10002048</Parameter>
+    </Include>
 
-    <!-- following chunk gives global information like name of board config and version of board config -->
-    <!-- A simple text chunk is sufficient, but available is only a XIP chunk inside this version of the hboot_image_compiler -->
-    <!-- format is
-         HWCVxxx.xxx.xxx.xxxx
-      	 NAM:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  44char reserved for name -->
-    <XIP>
-      <File name="@tBoardInfoReadable" load_address="0x10000048"/>
-    </XIP>
-
-    <Include name="@tBoardconfig" /> 
-
-    <!-- Breakpoint: Jump to a "bx lr" instruction in netX 4000 ROM at 0x041120bc -->
+    <!-- Breakpoint option used for HWC debugging: Jump to a "bx lr" instruction in netX 4000 ROM at 0x041120bc -->
     <!-- increment the target address by one to change to Thumb mode -->
     <Execute>
       <Address>0x041120bd</Address>
     </Execute>
-
 
 
     <!-- fill with dummy data until end of HW data is reached -->
