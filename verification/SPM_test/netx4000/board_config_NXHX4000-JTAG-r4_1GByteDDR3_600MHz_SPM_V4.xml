@@ -791,6 +791,9 @@
   </Concat>
 </Data>
 
+<Execute>
+  <Address>0x041120bd</Address>
+</Execute>		 
 <Snip group="com.hilscher.hw.util.netx4000" artifact="setup_dpm_netx4000_full" version="1.1.11">
   <!-- possible parameter according to definition of boot loader handover parameter -->
   <!-- 0 => read boot strapping options -->
@@ -801,6 +804,9 @@
   <Parameter name="CONFIGURATION_ADDRESS">0x040b0300</Parameter>
 </Snip>
 
+<Execute>
+  <Address>0x041120bd</Address>
+</Execute>	
 
 <!-- Configure the DDR3 RAM with ECC. 2 x IS43TR16256AL-125KBLI (+ 1x IS43TR16256AL-125KBLI for ECC) 1 Gbyte / 32 Bit -->
 <Snip artifact="DDR3_IS43TR16256AL-125KBLI_netX4000_NXHX4000_R1_600MHz_ECC" group="com.hilscher.comp.ddr3" version="1.0.1" />

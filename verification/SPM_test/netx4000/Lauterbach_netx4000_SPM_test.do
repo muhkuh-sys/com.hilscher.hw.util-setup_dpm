@@ -179,11 +179,12 @@ d.dump 0x05200000
 
 // use only for debugging if stopped inside snippet setup_dpm
 // Break.Set 0x4000008 /Onchip /PROGRAM /COUNT ?3?
-// Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
+//Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
 
 Mode
 
-Break.Set 0x4000008 /Onchip /PROGRAM /COUNT 2
+//Break.Set 0x040b0300 /Onchip /PROGRAM
+//Break.Set 0x4000008 /Onchip /PROGRAM /COUNT 3
 
 Break.Set 0x041120bc /Onchip /PROGRAM
 
@@ -205,45 +206,93 @@ go
 // reset netX4000
 SYStem.RESetOut
 
+
+
+// wait for first BP
 WAIT (!STATE.RUN()) 1s
 
 IF STATE.RUN()
 (
-  DIALOG.OK "Failed to stop before start of setup_dpm"
+  DIALOG.OK "Failed to stop at first BP"
   ENDDO
 )
-// first breakpoint is expected just before start of setup_dpm program
+
+PRINT Register(PC)
+
+
+
+// set the second breakpoint
+Break.Set 0x04000000 /Onchip /PROGRAM
+
+
+
+GO
+
+
+WAIT (STATE.RUN()) 1s
+
+// wait for second BP
+WAIT (!STATE.RUN()) 1s
+
+IF STATE.RUN()
+(
+  DIALOG.OK "Failed to stop at second BP"
+  ENDDO
+)
+
+PRINT Register(PC)
+
+// second breakpoint is expected just before start of setup_dpm program
 data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /DIFF
 IF FOUND()
 (
-	DIALOG.OK "Error setup_dpm code NOT found"
+	DIALOG.OK "Error expected setup_dpm code NOT found"
+	//ENDDO
+)
+
+
+Break.Delete 0x04000000
+GO
+
+WAIT (STATE.RUN()) 1s
+
+// wait for third BP
+WAIT (!STATE.RUN()) 1s
+
+IF STATE.RUN()
+(
+  DIALOG.OK "Failed to stop at forth BP"
+  ENDDO
+)
+
+data.LOAD.binary ref_netx4000.bin 0x05200000++0x012 /DIFF
+IF FOUND()
+(
+	DIALOG.OK "MESSAGE-TEST 1 FAILED! no correct message found for netx4000 SPM-Setup"
 	ENDDO
 )
 
-// 
-go
-WAIT (!STATE.RUN()) 1s
+GO
 
+WAIT (STATE.RUN()) 1s
+
+// wait for forth BP
+WAIT (!STATE.RUN()) 1s
 
 IF STATE.RUN()
 (
   DIALOG.OK "Failed to stop at end of HWC"
   ENDDO
 )
+
 data.LOAD.binary ref_netx4000.bin 0x05200000++0x012 /DIFF
-IF !FOUND()
+IF FOUND()
 (
-	DIALOG.OK "Found Message for netx4000 SPM-Setup! TEST OK"
+	DIALOG.OK "MESSAGE-TEST 2 FAILED! no correct message found for netx4000 SPM-Setup"
 	ENDDO
 )
-ELSE
-(
 
-	DIALOG.OK "TEST FAILED! no correct message found for netx4000 SPM-Setup"
-	ENDDO
-
-)
-
-
+DIALOG.OK "TEST OK"
 ENDDO
+
 

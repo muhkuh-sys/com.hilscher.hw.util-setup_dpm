@@ -193,4 +193,4 @@ tPOM_netx90_mpw = tEnv_netx90_mpw.POMTemplate('%s/%s-%s.pom' % (strArtifactPath_
 #
 
 # Create binaries for verification 
-tst1_netx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/SPM_test/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4000/board_config_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml', 'tElfapply_asic_ctrl_netx4000': 'verification/SPM_test/common/apply_asic_ctrl_netx4000.elf'}), HBOOTIMAGE_VERBOSE=False)
+tst1_netx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/SPM_test/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4000/board_config_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml'}), HBOOTIMAGE_VERBOSE=False)
