@@ -177,18 +177,97 @@ Break
 
 d.dump 0x05200000
 
-Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
+//Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
 
 Mode
 
-Break.Set 0x4000008 /Onchip /PROGRAM /COUNT 3
 
-Go
+Break.Set 0x041120bc /Onchip /PROGRAM
 
+// invalid INTRAM
+d.Set 0x05100000++0xff %Long 0x1234ffff
+
+// invalid DPM window message
+d.Set 0x05200000++0xff %Long 0x8987affe
+
+// set PC into endless loop
+d.set 0x05100000++3 %Long 0xEAFFFFFE
+
+R.S PC R:0x05100000
+R.S CPSR 0x800001D8
+
+// reset is only allowed, if CPU is running
+go
+
+// reset netX4000
 SYStem.RESetOut
-
+// wait for first BP
 WAIT (!STATE.RUN()) 1s
 
+IF STATE.RUN()
+(
+  DIALOG.OK "Failed to stop at first BP"
+  ENDDO
+)
+
+PRINT Register(PC)
+
+
+
+// set the second breakpoint
+Break.Set 0x04000000 /Onchip /PROGRAM
+
+
+GO
+
+
+WAIT (STATE.RUN()) 1s
+
+// wait for second BP
+WAIT (!STATE.RUN()) 1s
+
+IF STATE.RUN()
+(
+  DIALOG.OK "Failed to stop at second BP"
+  ENDDO
+)
+
+
+// second breakpoint is expected just before start of setup_dpm program
+data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /DIFF
+IF FOUND()
+(
+	DIALOG.OK "Error expected setup_dpm code NOT found"
+	//ENDDO
+)
+
+Break.Delete 0x04000000
+GO
+
+WAIT (STATE.RUN()) 1s
+
+// wait for third BP
+WAIT (!STATE.RUN()) 1s
+
+IF STATE.RUN()
+(
+  DIALOG.OK "Failed to stop at forth BP"
+  ENDDO
+)
+
+data.LOAD.binary ref_netx4100.bin 0x05200000++0x012 /DIFF
+IF FOUND()
+(
+	DIALOG.OK "MESSAGE-TEST 1 FAILED! no correct message found for netx4100 SPM-Setup"
+	ENDDO
+)
+
+GO
+
+WAIT (STATE.RUN()) 1s
+
+// wait for forth BP
+WAIT (!STATE.RUN()) 1s
 
 IF STATE.RUN()
 (
@@ -196,19 +275,22 @@ IF STATE.RUN()
   ENDDO
 )
 
-data.LOAD.binary ref_netx4100.bin 0x05200000++0x012 /DIFF	
-IF !FOUND()
+data.LOAD.binary ref_netx4100.bin 0x05200000++0x012 /DIFF
+IF FOUND()
 (
-	DIALOG.OK "Found Message for netx4100 SPM-Setup! TEST OK"
-	ENDDO
-)
-ELSE
-(
-	DIALOG.OK "TEST FAILED! no correct message found for netx4100 SPM-Setup"
+	DIALOG.OK "MESSAGE-TEST 2 FAILED! no correct message found for netx4100 SPM-Setup"
 	ENDDO
 )
 
+// check if handshake_cfg.sel_dpm is set to 1 and handshake_cfg.dis_irq_rst_rd_dpm is set to 0
+IF (Data.Long(D:0xf4081404)!=0x00000010)
+(
+	DIALOG.OK "TEST FAILED! handshake_cfg register was not set correctly"
+	ENDDO
+)
 
-
+DIALOG.OK "TEST OK"
+GO
 ENDDO
+
 

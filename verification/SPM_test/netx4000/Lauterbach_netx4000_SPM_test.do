@@ -179,7 +179,7 @@ d.dump 0x05200000
 
 // use only for debugging if stopped inside snippet setup_dpm
 // Break.Set 0x4000008 /Onchip /PROGRAM /COUNT ?3?
-//Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
+Data.LOAD.Elf ..\..\..\targets\netx4000_full\setup_dpm_netx4000_full_intram.elf /NoCODE
 
 Mode
 
@@ -224,8 +224,6 @@ PRINT Register(PC)
 // set the second breakpoint
 Break.Set 0x04000000 /Onchip /PROGRAM
 
-
-
 GO
 
 
@@ -261,7 +259,7 @@ WAIT (!STATE.RUN()) 1s
 
 IF STATE.RUN()
 (
-  DIALOG.OK "Failed to stop at forth BP"
+  DIALOG.OK "Failed to stop at third BP"
   ENDDO
 )
 
@@ -292,7 +290,17 @@ IF FOUND()
 	ENDDO
 )
 
+// check if handshake_cfg.sel_dpm is set to 1 and handshake_cfg.dis_irq_rst_rd_dpm is set to 0
+IF (Data.Long(D:0xf4081404)!=0x00000010)
+(
+	DIALOG.OK "TEST FAILED! handshake_cfg register was not set correctly"
+	ENDDO
+)
+
 DIALOG.OK "TEST OK"
+
+GO
+
 ENDDO
 
 

@@ -74,6 +74,8 @@ typedef struct
 typedef struct
 {
 	unsigned long ulHifIoCfg;
+	unsigned long tHandshakeCrl0Cfg;
+	unsigned long tHandshakeCrl1Cfg;
 	unsigned long ulDPMEnable;
 	DPM_CONFIGURATION_T tDpmConfig;
 	unsigned long ulIDPM0Enable;

@@ -290,6 +290,7 @@ BOOTING_T boot_idpm(HOSTADEF(IDPM) *ptIdpmArea, IDPM_CONFIGURATION_T* ptIdpmConf
 		break;
 	}
 
+
 	clear_idpm_irqs_(ptIdpmArea);
 
 	idpm_configure_(ptIdpmArea, ptIdpmConfig, idpm);
@@ -384,6 +385,13 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		boot_idpm(ptIdpm1Area, &ptDpmConfigAll->tIdpm1Config, IDPM1);
 		break;
 	}
+
+	HOSTDEF(ptHandshakeCtrl0Area);
+	HOSTDEF(ptHandshakeCtrl1Area);
+
+	// set registers handshake_ctrl0/handshake_cfg and handshake_ctrl1/handshake_cfg
+	ptHandshakeCtrl0Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl0Cfg;
+	ptHandshakeCtrl1Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl1Cfg;
 
 	return iResult;
 }

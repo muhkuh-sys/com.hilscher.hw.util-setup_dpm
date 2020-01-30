@@ -758,7 +758,7 @@
       0x0003106F,    <!-- register/hif_io_ctrl/hif_io_cfg -->
       0x00000010,    <!-- register/handshake_ctrl0/handshake_cfg -->
       0x00000000     <!-- register/handshake_ctrl1/handshake_cfg -->
-	</UInt32>
+    </UInt32>
 
     <UInt32>
       0x00000002,    <!-- helper/dpm/dpm0_enable          -->
@@ -798,8 +798,7 @@
 
 <Execute>
   <Address>0x041120bd</Address>
-</Execute>	
-	 
+</Execute>		 
 <Snip group="com.hilscher.hw.util.netx4000" artifact="setup_dpm_netx4000_full" version="2.0.0">
   <!-- possible parameter according to definition of boot loader handover parameter -->
   <!-- 0 => read boot strapping options -->
@@ -807,8 +806,6 @@
   <!-- 7 => BootModeLed_REE_DPM_PCIE          -->
   <!-- 4 => BootModeLed_netX_HIF_DPM_parallel -->
   <!-- other values are used as address to CONFIGURATION PARAMETER -->
-  <!-- OR -->
-  <!-- use the following parameter to load the previous handover parameter from the address 0x040B0300 -->
   <Parameter name="CONFIGURATION_ADDRESS">0x040b0300</Parameter>
 </Snip>
 
@@ -816,9 +813,10 @@
   <Address>0x041120bd</Address>
 </Execute>	
 
+<!-- not available at netx4100 -->
 <!-- Configure the DDR3 RAM with ECC. 2 x IS43TR16256AL-125KBLI (+ 1x IS43TR16256AL-125KBLI for ECC) 1 Gbyte / 32 Bit -->
-<Snip artifact="DDR3_IS43TR16256AL-125KBLI_netX4000_NXHX4000_R1_600MHz_ECC" group="com.hilscher.comp.ddr3" version="1.0.1" />
-<MemoryDeviceUp device="MEMDEV_DDR"/>
+<!--Snip artifact="DDR3_IS43TR16256AL-125KBLI_netX4000_NXHX4000_R1_600MHz_ECC" group="com.hilscher.comp.ddr3" version="1.0.1" / -->
+<!-- MemoryDeviceUp device="MEMDEV_DDR"/ -->
 
 <!-- open firewall -->
 <Snip artifact="open_firewall" group="com.hilscher.hw.util.netx4000" version="0.0.1">
@@ -925,5 +923,4 @@
   </Concat>
 </Data>
 
-<!-- load a linux from SD card if available -->
-<Snip artifact="a9_sd_boot" group="com.hilscher.hboot.sniplib" version="1.0.1"/>
+<!-- no a9 available at netx4100!-->
