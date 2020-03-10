@@ -14,7 +14,11 @@
 #ifndef __BOOT_DPM_H__
 #define __BOOT_DPM_H__
 
-
+#define MESSAGE_DPM_SERIAL   "serial DPM"
+#define MESSAGE_DPM_PARALLEL "parallel DPM"
+#define MESSAGE_DPM_PCIE     "PCI express DPM"
+#define MESSAGE_IDPM     	 "IDPM"
+#define MESSAGE_SIZE		 0x20
 /*-----------------------------------*/
 
 

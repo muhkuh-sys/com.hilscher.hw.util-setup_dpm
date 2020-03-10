@@ -78,7 +78,7 @@ tTmp_netx4000_full = tEnv_netx4000_full.GccSymbolTemplate('targets/netx4000_full
 aArtifactGroupReverse = ['com', 'hilscher', 'hw', 'util', 'netx4000']
 atSnippet_netx4000_full = {
     'group': '.'.join(aArtifactGroupReverse),
-    'artifact': 'setup_dpm_netx4000_full',
+    'artifact': 'setup_dpm',
     'version': PROJECT_VERSION,
     'vcs_id': tEnv_netx4000_full.Version_GetVcsIdLong(),
     'vcs_url': tEnv_netx4000_full.Version_GetVcsUrl(),
@@ -88,7 +88,7 @@ atSnippet_netx4000_full = {
     'description': 'Setup the DPM on a netX4000 FULL. The strapping options or the parameter R0 determine if the parallel DPM, serial DPM or DPM via PCI express should be configured.',
     'categories': ['netx4000', 'booting', 'DPM'],
     'parameter': {
-        'CONFIGURATION_ADDRESS': {'help': 'The address of the hardware config.', 'default': 0}
+        'CONFIGURATION_ADDRESS': {'help': 'The address of the hardware configuration parameter block.', 'default': 0}
     }
 }
 strArtifactPath_netx4000_full = 'targets/snippets/%s/%s/%s' % ('/'.join(aArtifactGroupReverse), atSnippet_netx4000_full['artifact'], PROJECT_VERSION)
@@ -193,6 +193,6 @@ tPOM_netx90_mpw = tEnv_netx90_mpw.POMTemplate('%s/%s-%s.pom' % (strArtifactPath_
 #
 
 # Create binaries for verification 
-tst1_netx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/SPM_test/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4000/board_config_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml'}), HBOOTIMAGE_VERBOSE=False)
-tst2_netx4100_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4100/HWC_NXHX4100-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/SPM_test/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4100/board_config_NXHX4100-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml'}), HBOOTIMAGE_VERBOSE=False)
-tst3_cifx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/cifx4000/HWC_CIFX_PCIE4000-RE_R4.xml.hwc', 'verification/SPM_test/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/cifx4000/board_config_CIFX_PCIE4000-RE_R4.xml'}), HBOOTIMAGE_VERBOSE=False)
+tst1_netx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4000/HWC_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4000/board_config_NXHX4000-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml'}), HBOOTIMAGE_VERBOSE=False)
+tst2_netx4100_full = tEnv_netx4000_full.HBootImage('targets/verify/SPM_test/netx4100/HWC_NXHX4100-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.hwc', 'verification/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/SPM_test/netx4100/board_config_NXHX4100-JTAG-r4_1GByteDDR3_600MHz_SPM_V4.xml'}), HBOOTIMAGE_VERBOSE=False)
+tst3_cifx4000_full = tEnv_netx4000_full.HBootImage('targets/verify/cifx_test/cifx4000/HWC_CIFX_PCIE4000-RE_R4.xml.hwc', 'verification/common/top_hwc.xml', HBOOTIMAGE_KNOWN_FILES=dict({'tBoardconfig': 'verification/cifx_test/cifx4000/board_config_CIFX_PCIE4000-RE_R4.xml'}), HBOOTIMAGE_VERBOSE=False)

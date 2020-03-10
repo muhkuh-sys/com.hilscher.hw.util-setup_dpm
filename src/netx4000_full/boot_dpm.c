@@ -14,10 +14,7 @@
 #include "options.h"
 
 
-#define MESSAGE_DPM_SERIAL   "serial DPM"
-#define MESSAGE_DPM_PARALLEL "parallel DPM"
-#define MESSAGE_DPM_PCIE     "PCI express DPM"
-#define MESSAGE_IDPM     	 "IDPM"
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -113,7 +110,7 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType, HIF_CONFIG_T* ptDpm
 
 	/* Leave a message in the DPM. */
 	pvDPM = (void*) HOSTADDR(intramhs_straight_mirror);
-	memset(pvDPM, 0, 65536);
+	memset(pvDPM, 0, MESSAGE_SIZE);
 	switch (tDpmTransportType) {
 	case DPM_TRANSPORT_TYPE_Parallel:
 		set_dpm_message((char*) pvDPM, MESSAGE_DPM_PARALLEL);
@@ -150,6 +147,9 @@ static void dpm_init(DPM_TRANSPORT_TYPE_T tDpmTransportType, HIF_CONFIG_T* ptDpm
 		ptDpmArea->ulDpm_io_cfg_misc = ptDpmConfig->tDpmConfig.ulDpmIoCfgMisc;
 		ptDpmArea->aulDpm_pio_cfg[0] = ptDpmConfig->tDpmConfig.ulDpmPioCfg0;
 		ptDpmArea->aulDpm_pio_cfg[1] = ptDpmConfig->tDpmConfig.ulDpmPioCfg1;
+
+    /* activate the configuration by re-writeing the mode bits inside the config register */
+		ptDpmArea->ulDpm_cfg0x0 = ptDpmConfig->tDpmConfig.ulDpmCfg0x0;
 
 	} else {
 		/* DPM mapping:
@@ -471,7 +471,7 @@ BOOTING_T boot_pcie(int idpm) {
 	switch (idpm) {
 	case 0:
 		pvDPM = (void*) HOSTADDR(intramhs0_straight_mirror);
-		memset(pvDPM, 0, 65536);
+		memset(pvDPM, 0, MESSAGE_SIZE);
 		set_dpm_message((char*) pvDPM, MESSAGE_DPM_PCIE);
 		tResult = pcie_init(idpm);
 		if (tResult == BOOTING_Ok) {
@@ -481,7 +481,7 @@ BOOTING_T boot_pcie(int idpm) {
 		
 	case 1:
 		pvDPM = (void*) HOSTADDR(intramhs1_straight_mirror);
-		memset(pvDPM, 0, 65536);
+		memset(pvDPM, 0, MESSAGE_SIZE);
 		set_dpm_message((char*) pvDPM, MESSAGE_DPM_PCIE);
 		tResult = pcie_init(idpm);
 		if (tResult == BOOTING_Ok) {

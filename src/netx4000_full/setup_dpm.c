@@ -13,17 +13,6 @@
 #endif
 
 
-//#define MESSAGE_DPM_SERIAL   "serial DPM"
-//#define MESSAGE_DPM_PARALLEL "parallel DPM"
-//#define MESSAGE_DPM_PCIE     "PCI express DPM"
-#define MESSAGE_IDPM     	 "IDPM"
-
-
-//#define MESSAGE_DPM_SERIAL   "netX4000 RELAXED serial DPM"
-//#define MESSAGE_DPM_PARALLEL "netX4000 RELAXED parallel DPM"
-//#define MESSAGE_DPM_PCIE     "netX4000 RELAXED PCI express DPM"
-//#define MESSAGE_IDPM     	 "netX4000 RELAXED IDPM"
-
 #include "netx_io_areas.h"
 #include "rdy_run.h"
 #include "systime.h"
@@ -157,9 +146,9 @@ static void idpm_configure_(HOSTADEF(IDPM) *ptIdpmArea, const IDPM_CONFIGURATION
 			ulNetxAdr = HOSTADDR(intramhs1_dpm_mirror);
 		break;
 	}
-	ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(idpm_win1_map_win_map);
-	ulValue |= HOSTMSK(idpm_win1_map_wp_cfg_win);
-	ptIdpmArea->ulIdpm_win1_map = ulValue;
+	// ulValue  = (ulNetxAdr-0x0100U) & HOSTMSK(idpm_win1_map_win_map);
+	// ulValue |= HOSTMSK(idpm_win1_map_wp_cfg_win);
+	ptIdpmArea->ulIdpm_win1_map = 0U;
 
 	ptIdpmArea->ulIdpm_win2_end = 0U;
 	ptIdpmArea->ulIdpm_win2_map = 0U;
@@ -207,13 +196,13 @@ static void init_intramhs(unsigned int idpm)
 	switch(idpm){
 	case 0:
 		pvDPM = (void*)HOSTADDR(intramhs0_straight_mirror);
-		memset(pvDPM, 0, 32768);
+		memset(pvDPM, 0, MESSAGE_SIZE);
 		set_dpm_message((char*) pvDPM, MESSAGE_IDPM);
 		break;
 		
 	case 1:
 		pvDPM = (void*)HOSTADDR(intramhs1_straight_mirror);
-		memset(pvDPM, 0, 32768);
+		memset(pvDPM, 0, MESSAGE_SIZE);
 		set_dpm_message((char*) pvDPM, MESSAGE_IDPM);
 		break;
 	}
@@ -315,6 +304,8 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 	BOOTING_T iResult = 0;
 	HOSTDEF(ptIdpm0Area);
 	HOSTDEF(ptIdpm1Area);
+	HOSTDEF(ptHandshakeCtrl0Area);
+	HOSTDEF(ptHandshakeCtrl1Area);
 	//HOSTDEF(ptHifIoCtrlArea);
 	//HOSTDEF(ptAsicCtrlArea);
 
@@ -332,9 +323,11 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		break;
 	case 1:
 		iResult = boot_dpm(DPM_TRANSPORT_TYPE_Parallel, ptDpmConfigAll);
+		ptHandshakeCtrl0Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl0Cfg;
 		break;
 	case 2:
 		iResult = boot_dpm(DPM_TRANSPORT_TYPE_Serial, ptDpmConfigAll);
+		ptHandshakeCtrl0Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl0Cfg;
 		break;
 	}
 
@@ -354,15 +347,18 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		break;
 	case 1:
 
-		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
+		boot_idpm(ptIdpm0Area, &ptDpmConfigAll->tIdpm0Config, IDPM0);
+		
 		/*boot idpm0 as pcie*/
 		iResult = boot_pcie(IDPM0);
-
+		
+		ptHandshakeCtrl0Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl0Cfg;
 		break;
 	case 2:
-		ptIdpm0Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
+
 		/*boot idpm0 only*/
 		boot_idpm(ptIdpm0Area, &ptDpmConfigAll->tIdpm0Config, IDPM0);
+		ptHandshakeCtrl0Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl0Cfg;
 		break;
 	}
 
@@ -383,15 +379,11 @@ BOOTING_T setup_dpm_all(HIF_CONFIG_T* ptDpmConfigAll)
 		ptIdpm1Area->ulIdpm_cfg0x0 |= HOSTMSK(idpm_cfg0x0_enable);
 		/*boot idpm1 only*/
 		boot_idpm(ptIdpm1Area, &ptDpmConfigAll->tIdpm1Config, IDPM1);
+		ptHandshakeCtrl1Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl1Cfg;
 		break;
 	}
 
-	HOSTDEF(ptHandshakeCtrl0Area);
-	HOSTDEF(ptHandshakeCtrl1Area);
 
-	// set registers handshake_ctrl0/handshake_cfg and handshake_ctrl1/handshake_cfg
-	ptHandshakeCtrl0Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl0Cfg;
-	ptHandshakeCtrl1Area->ulHandshake_cfg = ptDpmConfigAll->tHandshakeCrl1Cfg;
 
 	return iResult;
 }
